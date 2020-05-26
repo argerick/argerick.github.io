@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Numpy Basics</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Numpy is one of the most important Python libraries of all time and serves as a basis for the Data Science/Machine Learning ecosystem....">
+
+        <meta name="author" content="Erick Vieyra">
+
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/numpy-basics.html">
+	<meta property="og:title" content="Numpy Basics">
+	<meta property="article:published_time" content="2020-05-23 20:06:00-05:00">
+            <meta property="og:description" content="Numpy is one of the most important Python libraries of all time and serves as a basis for the Data Science/Machine Learning ecosystem....">
+
+            <meta property="og:image" content="images/cover.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-numpy-basics">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Numpy Basics</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Sat 23 May 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p><a href="https://numpy.org/">Numpy</a> is one of the most important Python libraries of all time and serves as a basis for the Data Science/Machine Learning ecosystem. 
+It allows its users to process large quantities of numeric data and apply mathematical operations with ease and speed. </p>
+<p>Here are some notes covering the basics of the library, some tips and tricks, and some pitfalls to avoid. </p>
+<h2>Installation</h2>
+<p>If you are already using (Anaconda)[https://www.anaconda.com/products/individual] or many other Data Science toolkits, chances are you already have Numpy installed, otherwise, the two recommended ways of installing numpy are with <code>conda</code> and with <code>pip</code>.</p>
+<p>For <code>conda</code> users:</p>
+<div class="highlight"><pre><span></span><code><span class="err">conda install numpy</span>
+</code></pre></div>
+
+
+<p>For <code>pip</code> users:</p>
+<div class="highlight"><pre><span></span><code><span class="err">pip install numpy</span>
+</code></pre></div>
+
+
+<h2>The Numpy Array</h2>
+<p>Numpy's basic data structure is the <em>n-dimensional array</em>, or <em>ndarray</em>.
+While they might look similar to a Python <code>List</code>, <em>ndarrays</em> have important differences, mainly:</p>
+<ul>
+<li>They are immutable</li>
+<li>You can apply mathematical operations on them</li>
+</ul>
+<p>Lets see how we can declare and use one  </p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span> <span class="c1"># starting the ndarray from a Python List</span>
+</code></pre></div>
+
+
+<p>Ndarrays accept mathematical operators, indexes, and can be sliced like normal lists, therefore the following code is valid:</p>
+<div class="highlight"><pre><span></span><code><span class="n">arr</span><span class="o">+</span><span class="mi">1</span> 
+<span class="c1"># &gt; array([2,3,4,5,6])</span>
+<span class="n">arr</span><span class="o">+</span><span class="n">arr</span>
+<span class="c1"># &gt; array([2,4,6,8,10])</span>
+<span class="n">arr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="c1"># &gt; 6</span>
+<span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<span class="c1"># &gt; array([4,6])</span>
+</code></pre></div>
+
+
+<p>Note that adding arrays performs a vector/matrix operation instead of concatenating them!</p>
+<p>To create a 2D array (like a matrix), just use a list of lists:</p>
+<div class="highlight"><pre><span></span><code><span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+<span class="c1"># &gt; array([1,2]</span>
+<span class="c1">#         [3,4])</span>
+<span class="n">mat</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># rows: all (or &#39;:&#39;), cols: first (or &#39;0&#39;)</span>
+<span class="c1"># &gt; array([1,3])</span>
+</code></pre></div>
+
+
+<p>We will check indexing more in detail later.</p>
+<h2>Shape</h2>
+<p>You can get to know the size of each dimension of a Numpy array. This is called the <code>shape</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+<span class="c1"># &gt; (5,)</span>
+<span class="n">mat</span><span class="o">.</span><span class="n">shape</span>
+<span class="c1"># &gt; (2,2)</span>
+</code></pre></div>
+
+
+<p>The shape of a numpy array is a tuple with the size of each dimension, starting with its rows. 
+Note that a shape of <code>(5,)</code> is not the same as <code>(5,1)</code>, (here is a good explanation about the topic)[https://stackoverflow.com/questions/22053050/difference-between-numpy-array-shape-r-1-and-r]. </p>
+<h2>Array Creation</h2>
+<p>So far we have seen how to create an array using a Python list. Another common way to create an array is using a Numpy function and specifying its shape, for example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="c1"># &gt; array([1,1,1]</span>
+<span class="c1">#         [1,1,1])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="c1"># &gt; array([0,0,0]</span>
+<span class="c1">#         [0,0,0])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># &gt; array([1,0]</span>
+<span class="c1">#         [0,1])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># &gt; array([0,2,4,6,8])</span>
+</code></pre></div>
+
+
+<p>These methods, combined with simple mathematical operations can produce a big number of arrays with just a couple of lines of code.</p>
+<h2>Operations</h2>
+<p>One of the most powerful features of Numpy is that its data types support mathematical operations, therefore we can create expressive and concise code with little effort. </p>
+<h3>Mathematical Operators</h3>
+<p>Numpy arrays support all the mathematical operators:</p>
+<div class="highlight"><pre><span></span><code><span class="n">arr</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="c1"># &gt; array([2,3,4,5,6])</span>
+<span class="n">arr</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="c1"># &gt; array([2,4,6,8,10])</span>
+</code></pre></div>
+
+
+<h3>Array Arithmetic</h3>
+<p>You can compute matrix operations to Numpy arrays like the <em>dot</em> and <em>cross</em> products, array unions and much more.  Numpy provides a method for each of these operations:</p>
+<div class="highlight"><pre><span></span><code><span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="c1"># &gt; array([-3,  6, -3])</span>
+</code></pre></div>
+
+
+<h3>Array Functions</h3>
+<p>There are a lot of functions that you can compute on the elements of an array, for example the <code>mean</code>, <code>std</code>, etc.</p>
+<div class="highlight"><pre><span></span><code><span class="n">arr</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="c1"># &gt; 3.0</span>
+<span class="n">arr</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="c1"># &gt; 1.4142135623730951</span>
+</code></pre></div>
+
+
+<h2>Boolean Operations and Indexing</h2>
+<p>Boolean operations deserve to be mentioned specifically because we can easily create arrays of Boolean values with simple conditions and use these arrays for <em>masking</em> and <em>Boolean indexing</em>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">arr</span> <span class="o">&gt;</span> <span class="mi">2</span>
+<span class="c1"># &gt; array([False, False,  True,  True,  True])</span>
+</code></pre></div>
+
+
+<p>We can use one of these arrays as a sort of index like this:</p>
+<div class="highlight"><pre><span></span><code><span class="n">mask</span> <span class="o">=</span> <span class="n">arr</span> <span class="o">&lt;</span> <span class="mi">3</span>
+<span class="n">arr</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+<span class="c1"># &gt; array([1,2])</span>
+</code></pre></div>
+
+
+<h2>Performance</h2>
+<p>Numpy is written in C, therefore it is extremely fast and allows Python to process data at speeds way above normal Python loops (we are talking about several orders of magnitude).
+Here are some important things to keep in mind.</p>
+<h3>No Looping!</h3>
+<p>If you are trying to accomplish something using a <code>for</code> loop, chances are that a) There is a function already available for that, or b) You can achieve the same result using a mathematical operation. </p>
+<p>For example, check this comparison of a numpy operation and its <code>for</code> loop equivalent:</p>
+<div class="highlight"><pre><span></span><code><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5000</span><span class="p">))</span>
+<span class="c1"># &gt; 49995000, takes around 5 micro seconds</span>
+</code></pre></div>
+
+
+<div class="highlight"><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5000</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">i</span>
+
+<span class="n">result</span>
+<span class="c1"># &gt; same result, takes around 310 micro seconds</span>
+</code></pre></div>
+
+
+<p>Numpy's code is cleaner, easier to understand, and most importantly, <strong>it's around 60 times faster!</strong></p>
+<h3>Treat Arrays as Read-Only</h3>
+<p>While arrays in numpy are not strictly read-only data structures, trying to <em>append</em> elements to these arrays or constructing them with loops yields extremely slow code.</p>
+<p>Instead, create new arrays from subsets, slices, and masked versions of other arrays.</p>
+<p>You might be wondering about memory issues if you create an array for each step in your computation but don't worry, Numpy does not copy arrays every time you assign it to a new variable, instead it generates a <em>view</em> for your array as seen through that operation/slice/mask, which brings us to...</p>
+<h3>Array 'Copying'</h3>
+<p>Since Numpy produces a <em>view</em> instead of a copy of your array, modifying an array's element yields a change in any other array that shares its data!</p>
+<p>The following code produces these results:</p>
+<div class="highlight"><pre><span></span><code><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
+<span class="n">b</span>
+<span class="c1"># &gt; array([1,2,3]) : so far so good</span>
+
+<span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">b</span>
+<span class="c1"># &gt; array([10,2,3]) : WRONG! b has changed too!</span>
+</code></pre></div>
+
+
+<p>If you want to explicitly copy an array and assign it to another variable, use <code>np.copy()</code></p>
+<h2>Conclusion</h2>
+<p>Hopefully this post showed you some of the basics for using Numpy and some of the pitfalls to avoid. Leave a comment with any tips or tricks you might have.</p>
+<p>Happy coding!</p>
+    </article>
+
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>
