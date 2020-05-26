@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Installing ROS Lunar Loggerhead</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="This post shows how to install ROS Lunar Loggerhead and configuring a development environment in Ubuntu 16.04. Other operating systems,...">
+
+        <meta name="author" content="Erick Vieyra">
+
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/installing-ros-lunar-loggerhead.html">
+	<meta property="og:title" content="Installing ROS Lunar Loggerhead">
+	<meta property="article:published_time" content="2017-06-22 08:22:00-05:00">
+            <meta property="og:description" content="This post shows how to install ROS Lunar Loggerhead and configuring a development environment in Ubuntu 16.04. Other operating systems,...">
+
+                <meta property="og:image" content="/images/installing-ros-lunar-loggerhead_cover.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-installing-ros-lunar-loggerhead">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Installing ROS Lunar Loggerhead</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Thu 22 June 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p><img alt="cover" src="/images/installing-ros-lunar-loggerhead_cover.png"></p>
+<p>This post shows how to install ROS <em>Lunar Loggerhead</em> and configuring a development environment in Ubuntu 16.04. Other operating systems, as well as other versions of ROS can be found in the <a href="http://www.ros.org/install/">ROS installation guide</a>.</p>
+<h2>Installation</h2>
+<p>Follow the next steps to install ROS <em>Lunar Loggerhead</em> in Ubuntu 16.04.
+Other versions that support ROS <em>Lunar Loggerhead</em> are Ubuntu 15.10 and 17.04.</p>
+<h3>Adding repositories</h3>
+<p>Start by adding the repositories from <em>packages.ros.org</em> as a software source for your system.</p>
+<div class="highlight"><pre><span></span><code>sudo sh -c <span class="s1">&#39;echo &quot;deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main&quot; &gt; /etc/apt/sources.list.d/ros-latest.list&#39;</span>
+</code></pre></div>
+
+
+<p>Add the corresponding keys for verifying the repositories:</p>
+<div class="highlight"><pre><span></span><code>sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+</code></pre></div>
+
+
+<h3>Installing ROS Lunar Loggerhead</h3>
+<p>Now we update the software list of our system.</p>
+<div class="highlight"><pre><span></span><code>sudo apt-get update
+</code></pre></div>
+
+
+<p>... and we start a complete installation of ROS (base + rqt, rviz, robot-generic libraries, 2D/3D simulators, navigation and 2D/3D
+perception).</p>
+<div class="highlight"><pre><span></span><code>sudo apt-get install ros-lunar-desktop-full
+</code></pre></div>
+
+
+<p>For other installation options, visit the <a href="http://wiki.ros.org/lunar/Installation/Ubuntu">official ROS installation guide</a>.</p>
+<h2>Preparing a development environment</h2>
+<p>We will add some tools and utilities that allow us to easily manage our workspace.</p>
+<h3><em>Rosdep</em> y <em>Rosinstall</em></h3>
+<p><em>Rosdep</em> is a tool that automatically solves dependencies needed by other ROS packages in our system.</p>
+<p>The following commands start and update this tool in order to ensure that our workspace works correctly.</p>
+<div class="highlight"><pre><span></span><code>sudo rosdep init
+rosdep update
+</code></pre></div>
+
+
+<p><em>Rosinstall</em> is a Python tool that downloads and installs ROS packages. We can add this utility, as well as other dependencies for several ROS tools with the following command:</p>
+<div class="highlight"><pre><span></span><code>sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
+</code></pre></div>
+
+
+<h2>Configuring the environment</h2>
+<p>We will setup the environment variables that Linux needs to be able to use ROS commands from the terminal.</p>
+<h3>Running the bash script</h3>
+<p>ROS has a bash script that, when executed, configures the necessary variables for our environment.
+We can add a <code>source</code> command in the <code>.bashrc</code> file that loads this script thus easily setting up our bash sessions.
+<code>.bashrc</code> is by default the file that runs every time we open a new terminal in Ubuntu. To add our code at the end of the file run the following command:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;source /opt/ros/lunar/setup.bash&quot;</span> &gt;&gt; ~/.bashrc
+</code></pre></div>
+
+
+<p>... and reload for the current bash session:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span> ~/.bashrc
+</code></pre></div>
+
+
+<h2>Creating a workspace</h2>
+<p>We will now create a <em>Catkin</em> workspace (which is the tool that ROS uses to compile its source files) and we will add said workspace to our default bash session so we can execute our packages in a simple way.</p>
+<h3>Creating a Catkin workspace</h3>
+<p>Using the standard Linux command for creating and navigating directories, lets create a directory called <code>catkin_ws</code> and a subdirectory <code>catkin_ws/src</code>. We will then navigate to the subdirectory and initialize our workspace.</p>
+<div class="highlight"><pre><span></span><code>mkdir -p ~/catkin_ws/src
+<span class="nb">cd</span> ~/catkin_ws/src
+catkin_init_workspace
+</code></pre></div>
+
+
+<h3>catkin_make</h3>
+<p>To compile the ROS packages in our workspace, we can run the <code>catkin_make</code>
+command from the root of the workspace:</p>
+<div class="highlight"><pre><span></span><code>catkin_make
+</code></pre></div>
+
+
+<p>Once the workspace has been compiled, we can start using its packages!</p>
+<h3>"Adding" our workspace to the terminal</h3>
+<p>We can run a <code>source</code> command in our <code>.bashrc</code> file to export our workspaces variables and settings. We will accomplish this exporting the <code>setup.bash</code> to the bash session:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;source catkin_ws/devel/setup.bash&quot;</span> &gt;&gt; ~/.bashrc
+<span class="nb">source</span> ~/.bashrc
+</code></pre></div>
+    </article>
+
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Forward kinematics of an IRB2400 robot in Python</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="In robotics, forward kinematics consist on finding the state of the robot given a predefined set of joint values. This problem is...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="ABB">
+        <meta name="tags" content="kinematics">
+        <meta name="tags" content="IRB2400">
+        <meta name="tags" content="Python">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/forward-kinematics-of-an-irb2400-robot-in-python.html">
+	<meta property="og:title" content="Forward kinematics of an IRB2400 robot in Python">
+	<meta property="article:published_time" content="2016-08-11 21:22:00-05:00">
+            <meta property="og:description" content="In robotics, forward kinematics consist on finding the state of the robot given a predefined set of joint values. This problem is...">
+
+                <meta property="og:image" content="/images/forward-kinematics-of-an-irb2400-robot-in-python_cover.jpg">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-forward-kinematics-of-an-irb2400-robot-in-python">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Forward kinematics of an IRB2400 robot in Python</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Thu 11 August 2016
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>In robotics, forward kinematics consist on finding the state of the robot given a predefined set of joint values. This problem is relatively easy and can be solved with a small number of mathematical operations.</p>
+<p>Inverse kinematics consist on finding the joint values that would produce a desired state on our robot. Since there might be zero, one or many (even infinite) joint combinations that may allow a robot to reach a certain position,this problem is much more complex than forward kinematics mathematically speaking.</p>
+<p>In this post we will write a Python script that computes the forward kinematics of the IRB2400 robot in the most simple way possible.</p>
+<p><img alt="cover" src="/images/forward-kinematics-of-an-irb2400-robot-in-python.jpg"></p>
+<h2>A little bit of theory</h2>
+<p>Let's get a short overview of the concepts that we need to know to understand the script we will write:</p>
+<h3>Translation and rotation matrices</h3>
+<p>We can represent any position in 3D space with its <span class="math">\(x\)</span>, <span class="math">\(y\)</span> and <span class="math">\(z\)</span> coordinates. We can bundle this coordinates in a <span class="math">\(3 \times 1\)</span> matrix that can be used to represent a displacement in the 3D plane from the origin of our system. This interpretation is commonly known in robotics as a <em>translation matrix</em>.</p>
+<div class="math">$$\left[ \begin{array} {c} x\\ y\\ z\\  \end{array} \right]$$</div>
+<p>Likewise, in the 3D space, any rotation can be expressed as a combination of rotations on the <span class="math">\(x\)</span>, <span class="math">\(y\)</span> and <span class="math">\(z\)</span> axis. We can encode this rotations into a <span class="math">\(3 \times 3\)</span> matrix that, when multiplied by a point in space, we will get the corresponding point in space rotated by the rotation defined in the matrix.
+There are three simple <em>rotation matrices</em>: Rotations in the <span class="math">\(x\)</span> axis, in the <span class="math">\(y\)</span> axis, and in the <span class="math">\(z\)</span> axis.</p>
+<div class="math">$$R_x(\theta) = \left[ \begin{array} {ccc}
+1 &amp; 0 &amp; 0\\
+0 &amp; cos(\theta) &amp;-sin(\theta)\\
+0 &amp; sin(\theta) &amp; cos(\theta)\\
+\end{array} \right]$$</div>
+<div class="math">$$R_y(\theta) = \left[ \begin{array} {ccc}
+cos(\theta) &amp; 0 &amp; sin(\theta)\\
+0 &amp; 1 &amp; 0\\
+-sin(\theta) &amp; 0 &amp; cos(\theta)\\
+\end{array} \right]$$</div>
+<div class="math">$$R_z(\theta) = \left[ \begin{array} {ccc}
+cos(\theta)&amp; -sin(\theta) &amp; 0\\
+sin(\theta) &amp; cos(\theta) &amp; 0\\
+0 &amp; 0 &amp; 1\\
+\end{array} \right]$$</div>
+<h3>Robot frames</h3>
+<p>As we have seen, the position and orientation can be expressed in terms of matrices. If we bundle these two matrices together (plus some extra elements) into a <span class="math">\(4 x 4\)</span> matrix, we can define a robot <em>frame</em>. A frame is a coordinate system that has information about the displacement and angle that a robot joint has with respect of the last joint. The general form of a frame matrix is the following one:</p>
+<div class="math">$$ ^{n-1}T_n= \left[ \begin{array} {ccc|c}
+  &amp;   &amp;  &amp;  \\
+  &amp; R &amp;  &amp; T\\
+  &amp;   &amp;  &amp;  \\ \hline
+0 &amp; 0 &amp; 0 &amp; 1
+\end{array} \right]$$</div>
+<p>The first <span class="math">\(3 \times 3\)</span> sub-matrix is a rotation matrix and it tells us the angle that the link has with respect of the last link. The <span class="math">\(1 x 3\)</span> sub matrix contains the coordinates of the displacement that the link produces.
+By multiplying the frame matrices, we can relate a point in space going through all the links of the robot easily.</p>
+<h2>Computing the robot frames</h2>
+<p>Lets start by writing the first frame. This frame will go from the reference frame (world) to the base of the robot. We wont define any translation here but we will define a rotation produced by the join of the base. This rotation is on the <span class="math">\(z\)</span> axis, therefore, the frame matrix looks like this:</p>
+<div class="highlight"><pre><span></span><code><span class="n">T01</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+<span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>   <span class="p">,</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>        <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">],</span>
+<span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>   <span class="p">,</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>        <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">],</span>
+<span class="p">[</span>              <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>        <span class="mi">1</span><span class="p">,</span>         <span class="mi">0</span><span class="p">],</span>
+<span class="p">[</span>              <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>        <span class="mi">0</span><span class="p">,</span>         <span class="mi">1</span><span class="p">]])</span>
+</code></pre></div>
+
+
+<p>The next frame goes from the base up to the next joint, There is a displacement between the axis from the base and the next one. Also, there is a rotation regarding the reference coordinate system from the last segment; This rotation is along the <span class="math">\(y\)</span> axis.</p>
+<div class="highlight"><pre><span></span><code><span class="n">T12</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+<span class="p">[</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q2</span><span class="p">)</span> <span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>              <span class="mf">0.1</span><span class="p">],</span>
+<span class="p">[</span>             <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>                <span class="mi">0</span><span class="p">],</span>
+<span class="p">[</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q2</span><span class="p">)</span> <span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>            <span class="mf">0.615</span><span class="p">],</span>
+<span class="p">[</span>             <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>                <span class="mi">1</span><span class="p">]])</span>
+</code></pre></div>
+
+
+<p>The next frame also contains a displacement and a rotation, this time in the <span class="math">\(y\)</span> axis... we continue to add all the frames to the script in a similar manner as shown in the final code.</p>
+<p>We can extract the position as well as the orientation (raw, pitch and yaw) of the end effector from the final frame (multiplied by the other ones) in the way shown below:</p>
+<div class="highlight"><pre><span></span><code><span class="n">T06</span> <span class="o">=</span> <span class="n">T01</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T12</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T23</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T34</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T45</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="n">T56</span><span class="p">)))))</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">T06</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">T06</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+
+<span class="n">yaw</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span> <span class="n">T06</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">T06</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="o">-</span><span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">((</span><span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span> <span class="p">))</span>
+<span class="n">roll</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span> <span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]))</span>
+</code></pre></div>
+
+
+<p>Here is the function for Python:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span>  <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span>  <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">fk</span><span class="p">(</span><span class="n">Q</span><span class="p">):</span>
+    <span class="c1"># Direct kinematic solver for ABB IRB2400</span>
+    <span class="n">q1</span><span class="p">,</span><span class="n">q2</span><span class="p">,</span><span class="n">q3</span><span class="p">,</span><span class="n">q4</span><span class="p">,</span><span class="n">q5</span><span class="p">,</span><span class="n">q6</span> <span class="o">=</span> <span class="n">Q</span>
+
+    <span class="n">T01</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+    <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>        <span class="mi">0</span><span class="p">,</span>       <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>        <span class="mi">0</span><span class="p">,</span>       <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span>           <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>        <span class="mi">1</span><span class="p">,</span>       <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span>           <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>        <span class="mi">0</span><span class="p">,</span>       <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">T12</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+    <span class="p">[</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>       <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>      <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span>            <span class="mi">0</span><span class="p">,</span>       <span class="mi">1</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>        <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>       <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>    <span class="mf">0.615</span><span class="p">],</span>
+    <span class="p">[</span>            <span class="mi">0</span><span class="p">,</span>       <span class="mi">0</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>        <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">T23</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+    <span class="p">[</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span>       <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span>        <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span>            <span class="mi">0</span><span class="p">,</span>       <span class="mi">1</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>        <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span>       <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span>    <span class="mf">0.705</span><span class="p">],</span>
+    <span class="p">[</span>            <span class="mi">0</span><span class="p">,</span>       <span class="mi">0</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>        <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">T34</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+    <span class="p">[</span>     <span class="mi">1</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>     <span class="mf">0.258</span><span class="p">],</span>
+    <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q4</span><span class="p">),</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q4</span><span class="p">),</span>        <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>  <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q4</span><span class="p">),</span>    <span class="mf">0.135</span><span class="p">],</span>
+    <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>         <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">T45</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+    <span class="p">[</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q5</span><span class="p">),</span>      <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q5</span><span class="p">),</span>     <span class="mf">0.497</span><span class="p">],</span>
+    <span class="p">[</span>            <span class="mi">0</span><span class="p">,</span>      <span class="mi">1</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q5</span><span class="p">),</span>      <span class="mi">0</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q5</span><span class="p">),</span>         <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span>            <span class="mi">0</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>            <span class="mi">0</span><span class="p">,</span>         <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="c1"># x</span>
+    <span class="n">T56</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([</span>
+    <span class="p">[</span>     <span class="mi">1</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>    <span class="mf">0.085</span><span class="p">],</span>
+    <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q6</span><span class="p">),</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q6</span><span class="p">),</span>        <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>  <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q6</span><span class="p">),</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q6</span><span class="p">),</span>        <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>             <span class="mi">0</span><span class="p">,</span>        <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="c1">#T06 = T01 * T12 * T23 * T34 * T45 * T56</span>
+    <span class="n">T06</span> <span class="o">=</span> <span class="n">T01</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T12</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T23</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T34</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">T45</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span> <span class="n">T56</span><span class="p">)))))</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">T06</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">T06</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">yaw</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span> <span class="n">T06</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">T06</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="o">-</span><span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">((</span><span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span> <span class="p">))</span>
+    <span class="n">roll</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span> <span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">T06</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]))</span>
+
+    <span class="c1"># x , y , z , yaw, pitch, roll</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="p">,</span> <span class="p">[</span><span class="n">yaw</span><span class="p">],</span> <span class="p">[</span><span class="n">pitch</span><span class="p">],</span> <span class="p">[</span><span class="n">roll</span><span class="p">]])</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Zero position</span>
+<span class="nb">print</span> <span class="p">(</span><span class="n">fk</span><span class="p">(</span><span class="n">Q</span><span class="p">))</span>
+</code></pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/abb.html">ABB</a>, <a href="/tag/kinematics.html">kinematics</a>, <a href="/tag/irb2400.html">IRB2400</a>, <a href="/tag/python.html">Python</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

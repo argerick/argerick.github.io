@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Tutorial: forward kinematics. Part II</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="In this post we will define the DH matrices needed to create the kinematic model of an ABB IRB120 industrial robot that has 6 degrees of...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="kinematics">
+        <meta name="tags" content="robot">
+        <meta name="tags" content="python">
+        <meta name="tags" content="denavit-hartenberg parameters">
+        <meta name="tags" content="ABB">
+        <meta name="tags" content="IRB120">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/tutorial-forward-kinematics-part-iii.html">
+	<meta property="og:title" content="Tutorial: forward kinematics. Part II">
+	<meta property="article:published_time" content="2016-09-05 15:05:00-05:00">
+            <meta property="og:description" content="In this post we will define the DH matrices needed to create the kinematic model of an ABB IRB120 industrial robot that has 6 degrees of...">
+
+                <meta property="og:image" content="/images/tutorial-forward-kinematics-part-iii_ABB-IRB120.jpg">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-tutorial-forward-kinematics-part-iii">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Tutorial: forward kinematics. Part II</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Mon 05 September 2016
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>In this post we will define the DH matrices needed to create the kinematic model of an <em>ABB IRB120</em> industrial robot that has 6 degrees of freedom
+We will use the things we learned from the first and second parts of this tutorial and we will use that to create a Python script that showcases the kinematic model of the robot.</p>
+<p>You can check out other parts of this tutorial in the following links:</p>
+<p><a href="localhost:8000/">Tutorial: forward kinematics. Part
+I</a><br>
+<a href="localhost:8000/">Tutorial: forward kinematics. Part
+II</a></p>
+<h2>The ABB IRB120 robot</h2>
+<p>The IRB120 is ABB's smallest industrial robot. It has 6 degrees of freedom, which makes it a versatile robot for its size. We will get the dimentions of the robot from the <a href="http://www.abb.com/product/seitp327/3bbe1d4059f1746cc125768c0038b21e.aspx?productLanguage=se&amp;country=00&amp;tabKey=7">publicly available CAD drawings from ABB Robotics</a>.</p>
+<p><img alt="ABB-IRB120-CAD" src="/images/tutorial-forward-kinematics-part-iii_ABB-IRB120.jpg"></p>
+<h2>Creating the kinematic model</h2>
+<p>Now we will define and place the coordinate systems in the robot and get the corresponding DH parameters:</p>
+<p><em>Note:</em> The position of the robot in the CAD was taken as the robot's <em>zero-position</em>.</p>
+<ol>
+<li>We will place in the base of the robot the origin <em>[0,0,0]</em> of the first frame.
+<img alt="DH1" src="/images/tutorial-forward-kinematics-part-iii_DH1.png"></li>
+<li>The frame associated to the joint in the base has its origin in <em>[0,0,0.561]</em> regarding the base frame. The corresponding DH parameters are: <span class="math">\(δ = 0.561\)</span>, <span class="math">\(θ = 0\)</span>, <span class="math">\(r = 0\)</span>,<span class="math">\(α = 0\)</span>.
+<img alt="DH2" src="/images/tutorial-forward-kinematics-part-iii_DH2.png"></li>
+<li>After placing the <span class="math">\(Z\)</span> axis in the next joint, we can see that the axis is rotated 90 deg in comparison th the <span class="math">\(Z\)</span> axis of the previous joint. In DH parameter terms, it has a 90 degree rotation in <span class="math">\(α\)</span>. We place the origin in <em>[0,0,0.309]</em>. The DH parameters are: <span class="math">\(δ = 0.309\)</span>, <span class="math">\(θ = 0\)</span>, <span class="math">\(r = 0\)</span>, <span class="math">\(α = 90\)</span>.
+<img alt="DH3" src="/images/tutorial-forward-kinematics-part-iii_DH3.png"></li>
+<li>The next joint has its <span class="math">\(Z\)</span> axis in the same direction as the last one, but it has an offset of <em>0.810m</em> from the origin of the last frame. Give the orientation of this coordinate system, we will set <span class="math">\(θ\)</span> with an angle of 90 so we can have the current position of the robot as the the <em>zero-position</em>. The DH parameters are <span class="math">\(δ = 0\)</span>, <span class="math">\(θ = 90\)</span>, <span class="math">\(r = 0.810\)</span>, <span class="math">\(α = 0\)</span>.
+<img alt="DH4" src="/images/tutorial-forward-kinematics-part-iii_DH4.png"></li>
+<li>The next frame will be place just <em>0.21m</em> above the last one, with its <span class="math">\(Z\)</span> axis pointing towards the last two joints of the robot (90 degree rotation). The DH parameters are <span class="math">\(δ = 0\)</span>, <span class="math">\(θ = 0\)</span>, <span class="math">\(r = 0.21\)</span>, <span class="math">\(α = 90\)</span>.
+<img alt="DH5" src="/images/tutorial-forward-kinematics-part-iii_DH5.png"></li>
+<li>A distance of <em>0.906m</em> separates our frame with the coordinate system of the next segment. This one has no rotation whatsoever. The DH parameters are <span class="math">\(δ = 0.906\)</span>, <span class="math">\(θ = 0\)</span>, <span class="math">\(r = 0\)</span>,<span class="math">\(α = 0\)</span>.
+<img alt="DH6" src="/images/tutorial-forward-kinematics-part-iii_DH6.png"></li>
+<li>Lastly, we will place our coordinate system with a rotation of 90 degrees so that the <span class="math">\(Z\)</span> axis points towards the end effector of the robot. We will specify a small offset for the tool of the robot in the next step. The DH parameters are <span class="math">\(δ = 0\)</span>, <span class="math">\(θ = 0\)</span>, <span class="math">\(r = 0\)</span> , <span class="math">\(α = 90\)</span>.
+<img alt="DH7" src="/images/tutorial-forward-kinematics-part-iii_DH7.png"></li>
+<li>The last segment is <em>inside</em> the wrist of the robot. We will add a last frame that represents the end effector of the robot. The offset for this frame will be <em>0.216m</em>, according to the CAD drawing.
+<img alt="DH8" src="/images/tutorial-forward-kinematics-part-iii_DH8.png"></li>
+</ol>
+<h2>Computing the robot's kinematics with Python</h2>
+<p>The following script defines the needed DH matrices for an IRB120 robot, applies the joint values to said matrices and plots a representation of the robots state.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">axes3d</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span><span class="p">,</span> <span class="n">combinations</span>
+<span class="kn">import</span> <span class="nn">math</span> <span class="k">as</span> <span class="nn">m</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="c1"># Set plot related things...</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="n">plotRange</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="n">plotRange</span><span class="o">*</span><span class="mf">0.3</span><span class="p">,</span><span class="n">plotRange</span><span class="o">*</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="n">plotRange</span><span class="o">*</span><span class="mf">0.5</span><span class="p">,</span><span class="n">plotRange</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_zlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">plotRange</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">dhMatrix</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">a</span><span class="p">):</span> <span class="c1"># delta, theta, r, alpha</span>
+    <span class="sd">&quot;&quot;&quot;Gets the Denavit-Hartenberg parameters and</span>
+<span class="sd">    returns a numpy-based Denavit-Hartenberg matrix&quot;&quot;&quot;</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([</span>
+    <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="p">,</span><span class="o">-</span><span class="n">m</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="p">,</span><span class="n">r</span> <span class="o">*</span> <span class="n">m</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)],</span>
+    <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="p">,</span><span class="o">-</span><span class="n">m</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="p">,</span><span class="n">r</span> <span class="o">*</span> <span class="n">m</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)],</span>
+    <span class="p">[</span><span class="mi">0</span>          <span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>            <span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>              <span class="p">,</span><span class="n">d</span>           <span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span>            <span class="p">,</span> <span class="mi">0</span>                           <span class="p">,</span> <span class="mi">0</span>                         <span class="p">,</span><span class="mi">1</span>           <span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">M</span>
+
+<span class="k">def</span> <span class="nf">drawFrame</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Draws a coordinate reference frame from a 4x4 matrix.</span>
+<span class="sd">    Adds an extra thick line along the Z axis and around the</span>
+<span class="sd">    origin to simulate the joint in a robot segment&quot;&quot;&quot;</span>
+
+    <span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="c1"># extract Rot matrix</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>    <span class="c1"># extract traslation matrix</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]])</span> <span class="c1"># get the 3 other points of the drawn frame</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">],[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">]])</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="n">p1</span>   <span class="c1"># Rotate the points</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="n">p2</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="n">p3</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># Get the origin&#39;s position of the frame</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#draw the line from the origin to each of the points</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">p1</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)],[</span><span class="n">y</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="n">p1</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)],[</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="n">p1</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)],[</span><span class="n">y</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)],[</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span> <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)],[</span><span class="n">y</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)],[</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># draw the extra thicker line that simulates the</span>
+    <span class="c1">#robot&#39;s joint</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">z</span><span class="o">-</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="n">p3</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">],</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">drawTool</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Draws a very simple body from a 4x4 matrix to represent the</span>
+<span class="sd">    end effector of a robot.&quot;&quot;&quot;</span>
+
+    <span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="c1"># extract Rot matrix</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>    <span class="c1"># extract traslation matrix</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]])</span> <span class="c1"># get the 3 other points of the drawn frame</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">],[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">]])</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="n">p1</span>   <span class="c1"># Rotate the points</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="n">p2</span>
+    <span class="n">p3</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="n">p3</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># Get the origin&#39;s position of the frame</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">l</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c1"># draw the extra thicker line that simulates the</span>
+    <span class="c1">#robot&#39;s joint</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="n">x</span><span class="o">+</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">y</span><span class="o">-</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">z</span><span class="o">-</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">,</span><span class="n">z</span><span class="o">+</span><span class="n">p2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">l</span><span class="p">],</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">drawSegment</span><span class="p">(</span><span class="n">F1</span><span class="p">,</span><span class="n">F2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Draws a thick segment between two Frames</span>
+<span class="sd">    given as arguments.&quot;&quot;&quot;</span>
+    <span class="n">T1</span> <span class="o">=</span> <span class="n">F1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># traslation matrix 1</span>
+    <span class="n">T2</span> <span class="o">=</span> <span class="n">F2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># traslation matrix 2</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">T1</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="n">T2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">0</span><span class="p">)],</span>
+            <span class="p">[</span><span class="n">T1</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">T2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">1</span><span class="p">)],</span>
+            <span class="p">[</span><span class="n">T1</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">T2</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
+
+<span class="n">sA</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mf">3.1415</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="c1"># straight angle 90 degrees</span>
+
+<span class="c1"># MODIFY THE THETA PARAMETERS HERE TO SEE THE CHANGES!</span>
+<span class="n">To</span>  <span class="o">=</span> <span class="n">dhMatrix</span><span class="p">(</span><span class="mi">0</span>        <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span><span class="mi">0</span>      <span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">T01</span> <span class="o">=</span> <span class="n">dhMatrix</span><span class="p">(</span><span class="mf">0.561</span>    <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span><span class="mi">0</span>      <span class="p">,</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># first joint to second</span>
+<span class="n">T12</span> <span class="o">=</span> <span class="n">dhMatrix</span><span class="p">(</span><span class="mf">0.309</span>    <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span><span class="mi">0</span>      <span class="p">,</span><span class="n">sA</span><span class="p">)</span>  <span class="c1"># second to third joint</span>
+<span class="n">T23</span> <span class="o">=</span> <span class="n">dhMatrix</span><span class="p">(</span><span class="mi">0</span>        <span class="p">,</span><span class="n">sA</span>   <span class="p">,</span><span class="mf">0.810</span>  <span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">T34</span> <span class="o">=</span> <span class="n">dhMatrix</span><span class="p">(</span><span class="mi">0</span>        <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span><span class="mf">0.21</span>   <span class="p">,</span><span class="n">sA</span><span class="p">)</span>
+<span class="n">T45</span> <span class="o">=</span> <span class="n">dhMatrix</span><span class="p">(</span><span class="mf">0.906</span>    <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span><span class="mi">0</span>      <span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">T56</span> <span class="o">=</span> <span class="n">dhMatrix</span><span class="p">(</span><span class="mi">0</span>        <span class="p">,</span><span class="mi">0</span>    <span class="p">,</span><span class="mi">0</span>      <span class="p">,</span><span class="n">sA</span><span class="p">)</span>
+
+<span class="n">Ttool</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="s1">&#39;1 0 0 0 ; 0 1 0 0.216 ; 0 0 1 0 ; 0 0 0 1&#39;</span><span class="p">)</span>
+
+
+<span class="n">T02</span> <span class="o">=</span> <span class="n">T01</span> <span class="o">*</span> <span class="n">T12</span>
+<span class="n">T03</span> <span class="o">=</span> <span class="n">T02</span> <span class="o">*</span> <span class="n">T23</span>
+<span class="n">T04</span> <span class="o">=</span> <span class="n">T03</span> <span class="o">*</span> <span class="n">T34</span>
+<span class="n">T05</span> <span class="o">=</span> <span class="n">T04</span> <span class="o">*</span> <span class="n">T45</span>
+<span class="n">T06</span> <span class="o">=</span> <span class="n">T05</span> <span class="o">*</span> <span class="n">T56</span>
+<span class="n">Tt</span>  <span class="o">=</span> <span class="n">T06</span> <span class="o">*</span> <span class="n">Ttool</span>
+
+
+<span class="n">drawFrame</span><span class="p">(</span><span class="n">To</span><span class="p">)</span>
+<span class="n">drawSegment</span><span class="p">(</span><span class="n">To</span><span class="p">,</span><span class="n">T01</span><span class="p">)</span>
+<span class="n">drawFrame</span><span class="p">(</span><span class="n">T01</span><span class="p">)</span>
+<span class="n">drawSegment</span><span class="p">(</span><span class="n">T01</span><span class="p">,</span><span class="n">T02</span><span class="p">)</span>
+<span class="n">drawFrame</span><span class="p">(</span><span class="n">T02</span><span class="p">)</span>
+<span class="n">drawSegment</span><span class="p">(</span><span class="n">T02</span><span class="p">,</span><span class="n">T03</span><span class="p">)</span>
+<span class="n">drawFrame</span><span class="p">(</span><span class="n">T03</span><span class="p">)</span>
+<span class="n">drawSegment</span><span class="p">(</span><span class="n">T03</span><span class="p">,</span><span class="n">T04</span><span class="p">)</span>
+<span class="n">drawFrame</span><span class="p">(</span><span class="n">T04</span><span class="p">)</span>
+<span class="n">drawSegment</span><span class="p">(</span><span class="n">T04</span><span class="p">,</span><span class="n">T05</span><span class="p">)</span>
+<span class="n">drawFrame</span><span class="p">(</span><span class="n">T05</span><span class="p">)</span>
+<span class="n">drawSegment</span><span class="p">(</span><span class="n">T05</span><span class="p">,</span><span class="n">T06</span><span class="p">)</span>
+<span class="n">drawFrame</span><span class="p">(</span><span class="n">T06</span><span class="p">)</span>
+
+<span class="n">drawTool</span> <span class="p">(</span><span class="n">Tt</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="nb">print</span> <span class="n">Tt</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;End effector position submatrix [xyz]:&quot;</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="n">Tt</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;End effector orientation submatrix&quot;</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="n">Tt</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+</code></pre></div>
+
+
+<p>Modify the values of <span class="math">\(θ\)</span> to move the robot to the desired position!</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/kinematics.html">kinematics</a>, <a href="/tag/robot.html">robot</a>, <a href="/tag/python.html">python</a>, <a href="/tag/denavit-hartenberg-parameters.html">denavit-hartenberg parameters</a>, <a href="/tag/abb.html">ABB</a>, <a href="/tag/irb120.html">IRB120</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

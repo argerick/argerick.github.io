@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Understanding the Parameter Server in ROS</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="As stated in the official ROS tutorials, the parameter server... "...is a shared, multi-variate dictionary that is accessible via...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="ROS">
+        <meta name="tags" content="tutorial">
+        <meta name="tags" content="rosparam">
+        <meta name="tags" content="rospy">
+        <meta name="tags" content="parameter server">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/understanding-the-parameter-server-in-ros.html">
+	<meta property="og:title" content="Understanding the Parameter Server in ROS">
+	<meta property="article:published_time" content="2017-11-04 04:38:00-05:00">
+            <meta property="og:description" content="As stated in the official ROS tutorials, the parameter server... "...is a shared, multi-variate dictionary that is accessible via...">
+
+                <meta property="og:image" content="/images/cover.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-understanding-the-parameter-server-in-ros">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Understanding the Parameter Server in ROS</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Sat 04 November 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>As stated in the official ROS tutorials, the parameter server...</p>
+<blockquote>
+<p>"...is a shared, multi-variate dictionary that is accessible via network APIs. Nodes use this server to store and retrieve parameters at runtime. As it is not designed for high-performance, it is best used for static, non-binary data such as configuration parameters."</p>
+</blockquote>
+<p>In this post we will learn how to set and retrieve parameters on the server, as well as some important concepts for using it effectively. We will go through examples that set and get parameters from the server using the built-in ROS command-line tools, launch files, and python scripts.</p>
+<h2>Basic command-line tools</h2>
+<p>Just as nodes and topics, parameters follow the ROS-standard naming convention, which means that they are organized hierarchically into name-spaces using the slash character.  </p>
+<h3>Using <code>rosparam</code></h3>
+<p><code>rosparam</code> is a command-line tool that can help us to manipulate information from the parameter server straight from a terminal.</p>
+<h4><code>rosparam list</code></h4>
+<p>We can print a list of all the parameters currently configured in the server by issuing the following command</p>
+<div class="highlight"><pre><span></span><code>$ rosparam list
+</code></pre></div>
+
+
+<p>The following output was obtained by running the <code>display.launch</code> file in the  <a href="https://github.com/sevieyra/enesbot_dualarm">enesbot_dual_arm package</a>:</p>
+<div class="highlight"><pre><span></span><code>/robot_description
+/rosdistro
+/roslaunch/uris/my_computer
+/rosversion
+/run_id
+/use_gui
+</code></pre></div>
+
+
+<p>Some of the parameters shown are 'universal' as in they are set whenever <em>roscore</em> is started. <code>/rosdistro</code> and <code>/rosversion</code> are two examples and, as their name implies, they contain the currently used distribution and version number of ROS.</p>
+<p>We can also see other common parameters in ROS, like  <code>/robot_description</code>, which contains the URDF file parsed by Xacro. This parameter is used by other nodes in ROS (like RVIZ).</p>
+<p>The argument <code>/use_gui</code> tells the <em>joint_state_publisher</em> to show a little window with controls that directly move the robot joints. We set-up this parameter using the launch file, which is one of several ways to configure the parameter server's content. More information about loading parameters is presented in the following sections.</p>
+<h4><code>rosparam get</code> and <code>rosparam set</code></h4>
+<p>With <code>rosparam get</code> <em><code>[parameter]</code></em> we can easily visualize the information contained in any parameter through the terminal. For example:</p>
+<div class="highlight"><pre><span></span><code>rosparam get /rosdistro
+</code></pre></div>
+
+
+<p>Will return <em>kinetic</em> in our case.</p>
+<p>To change the value of a parameter, use <code>rosparam get</code> <em><code>[parameter] [value]</code></em>. For instance</p>
+<div class="highlight"><pre><span></span><code>rosparam <span class="nb">set</span> /color <span class="o">[</span><span class="m">0</span> <span class="m">0</span> <span class="m">1</span><span class="o">]</span>
+</code></pre></div>
+
+
+<p>sets the <code>/color</code> parameter to <code>[0 0 1]</code> (blue).</p>
+<h2>Configuring the Parameter Server</h2>
+<p>There are three main ways to set parameters in the server. The most common one is within a launch file and using the <code>&lt;param&gt;</code> element to define and set a parameter or using <code>&lt;rosparam&gt;</code> and loading a <em>YAML</em>.
+The second way is to use the command-line tools to either set individual parameters or load a YAML file with them.
+Finally, we can also configure the parameter server from a node (C++ or Python). Lets go through these alternatives:</p>
+<h3>From a launch file</h3>
+<h4>The <code>&lt;param&gt;</code> element</h4>
+<p>It is very easy to use the <code>&lt;param&gt;</code> element to define a parameter for the server.</p>
+<p>The general-case scenario is to use it in the following form:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;param</span> <span class="na">name =</span> <span class="s">&quot;...&quot;</span> <span class="na">type =</span> <span class="s">&quot;...&quot;</span> <span class="na">value =</span> <span class="s">&quot;...&quot;</span> <span class="nt">/&gt;</span>  
+</code></pre></div>
+
+
+<p>We can define parameters that have a text file or a binary file as its value by specifying it in the <em>type</em> argument. The value will be saved as a string (for text files) or as a base64-encoded XML-RPC object for binary files.</p>
+<p>You can check the <a href="http://wiki.ros.org/roslaunch/XML/param">official ROS documentation</a> for more in-depth information of the <code>&lt;param&gt;</code> element.</p>
+<h4>The <code>&lt;rosparam&gt;</code> element</h4>
+<p>Similar to the way we use the <code>&lt;param&gt;</code> element, we can use <rosparam> plus the <em>command="load"</em> argument to set a parameter from a <em>YAML</em> file.</p>
+<p>The general usage is</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;rosparam</span> <span class="na">command =</span> <span class="s">&quot;load&quot;</span> <span class="na">file =</span> <span class="s">&quot;$(find my_package)/example.yaml&quot;</span> <span class="nt">/&gt;</span>  
+</code></pre></div>
+
+
+<p>You can check the <a href="http://wiki.ros.org/roslaunch/XML/rosparam">official ROS documentation</a> for more in-depth information of the <code>&lt;rosparam&gt;</code> element, as well as other <em>command</em> examples.</p>
+<h3>From the command-line</h3>
+<h4>Using <code>rosparam set</code></h4>
+<p>We can use the command-line to set a parameter in a very straight-forward way:</p>
+<div class="highlight"><pre><span></span><code>rosparam <span class="nb">set</span> <span class="o">[</span>parameter<span class="o">]</span> <span class="o">[</span>value<span class="o">]</span>
+</code></pre></div>
+
+
+<h4>Using <code>rosparam load</code></h4>
+<p>Use <code>rosparam</code> from the command line to load a YAML file into the parameter server. The general syntax for the command is:</p>
+<div class="highlight"><pre><span></span><code>rosparam load <span class="o">[</span>file<span class="o">]</span> <span class="o">[</span>namespace<span class="o">]</span>
+</code></pre></div>
+
+
+<h3>Get and Set parameters from Python</h3>
+<p>Lets create a simple Python script that sets some parameters in the server and then prints them to a terminal console.</p>
+<p>Begin with importing <code>rospy</code> into your script:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">rospy</span>
+</code></pre></div>
+
+
+<p>To get a parameter, use <code>rospy.get_param( param )</code> to retrieve it from the server:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># access a parameter</span>
+<span class="nb">print</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;/use_gui&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>We can check if a parameter exists before attempting to access it with:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># check before accessing</span>
+<span class="k">if</span> <span class="n">rospy</span><span class="o">.</span><span class="n">has_param</span><span class="p">(</span><span class="s1">&#39;/default_pose&#39;</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;default_pose&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="s1">&#39;Could not find parameter!&#39;</span>
+</code></pre></div>
+
+
+<p>To set parameters, use <code>rospy.set_param( param, value )</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># set a parameter: set_param(parameter,value)</span>
+<span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;/name&#39;</span><span class="p">,</span><span class="s1">&#39;my enesbot&#39;</span><span class="p">)</span>
+<span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;/myInt&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;/myList&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</code></pre></div>
+
+
+<p>By sending a Python dictionary, we can create a namespace:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">#set a namespace with a python dictionary</span>
+<span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;/pos&#39;</span><span class="p">,{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">})</span>
+<span class="c1"># rosparam get /pos   ---&gt; {x: 1, y: 2, z: 3}</span>
+<span class="c1"># rosparam get /pos/x ---&gt; 1</span>
+<span class="c1"># rosparam get /pos/y ---&gt; 5        etc!</span>
+</code></pre></div>
+
+
+<p>Use <code>rosparam list</code> and <code>rosparam get [param]</code> to check the created parameters !</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/ros.html">ROS</a>, <a href="/tag/tutorial.html">tutorial</a>, <a href="/tag/rosparam.html">rosparam</a>, <a href="/tag/rospy.html">rospy</a>, <a href="/tag/parameter-server.html">parameter server</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

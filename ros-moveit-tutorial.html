@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>ROS Moveit! tutorial</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="In this blog post, we will create a node that uses Moveit! to plan and execute movements in our dual-arm robot. For more content...">
+
+        <meta name="author" content="Erick Vieyra">
+
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/ros-moveit-tutorial.html">
+	<meta property="og:title" content="ROS Moveit! tutorial">
+	<meta property="article:published_time" content="2017-07-09 08:24:00-05:00">
+            <meta property="og:description" content="In this blog post, we will create a node that uses Moveit! to plan and execute movements in our dual-arm robot. For more content...">
+
+                <meta property="og:image" content="//images/ros-moveit-tutorial_cover.jpg">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-ros-moveit-tutorial">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>ROS Moveit! tutorial</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Sun 09 July 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>In this blog post, we will create a node that uses <em>Moveit!</em> to plan and execute movements in our <a href="/ROS/creating-a-dual-arm-manipulator-in-ROS.md">dual-arm robot</a>. For more content regarding <strong>ROS</strong> click <a href="/pages/ros.md">here</a>.</p>
+<p><img alt="cover" src="/images/ros-moveit-tutorial_cover.jpg"></p>
+<h2>About <em>Moveit!</em></h2>
+<p>As stated in Moveit!'s website</p>
+<blockquote>
+<p>MoveIt! is state of the art software for mobile manipulation, incorporating the latest advances in motion planning, manipulation, 3D perception, kinematics, control and navigation. It provides an easy-to-use platform for developing advanced robotics applications, evaluating new robot designs and building integrated robotics products for industrial, commercial, R&amp;D and other domains.</p>
+</blockquote>
+<p>Here we will learn to plan and execute a path in the most simple way using <em>Python</em> and visualizing the result in <em>RVIZ</em>.</p>
+<h2>Installation</h2>
+<p>Let's start using <em>moveit!</em>.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li><strong>ROS Kinetic</strong> in <strong>Ubuntu 16.04</strong> (other versions not tested)</li>
+<li><strong>enesbot-dualarm</strong> package. Clone it from <a href="https://github.com/sevieyra/enesbot_dualarm">Github</a> or <a href="/ROS/creating-a-dual-arm-manipulator-in-ROS.md">create your own!</a>)</li>
+</ul>
+<h3>Install <em>Moveit!</em></h3>
+<div class="highlight"><pre><span></span><code>sudo apt-get install ros-kinetic-moveit
+</code></pre></div>
+
+
+<h2>The <em>Moveit!</em> setup wizard</h2>
+<p>Start the <em>Moveit!</em> setup assistant:</p>
+<div class="highlight"><pre><span></span><code>roslaunch moveit_setup_assistant setup_assistant.launch
+</code></pre></div>
+
+
+<p><img alt="setup_assistant" src="/images/ros-moveit-tutorial_setup-assistant.png"></p>
+<p>Click on <em>Create new Moveit! configuration package</em> and select the XACRO file for our dual-arm robot.
+Click on <code>Load Files</code>.</p>
+<h3>Collision detection</h3>
+<p>On the left pane, select <code>Self-Collisions</code> and click on <code>Generate Collision Matrix</code> using the default values.</p>
+<h3>Virtual Joints</h3>
+<p>Virtual joints are defined for special cases where a robot needs to be attached to a movable object (like the world frame) and this frame is gonna have movement. This is very common in movable robots but for our case we will skip it and do not specify any virtual joints.</p>
+<h3>Planning Groups</h3>
+<p>On the left pane, select <code>Planning Groups</code> and click on <code>Add Group</code>. We will create a group for each of the robot's arms.</p>
+<p>For the left arm, select these parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group name</td>
+<td>left_arm</td>
+</tr>
+<tr>
+<td>Kinematic Solver</td>
+<td>KDL</td>
+</tr>
+<tr>
+<td>Kin. Search Resolution</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Kin. Search Timeout</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Kin. Solver Attempts</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>Click on <code>Add Joints</code> and select all joints from jl1 to jl7. Press <code>Save</code>.</p>
+<p>You can then double click and add the links and specify the chain with the following parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Joints</td>
+<td>jl1 to jl7</td>
+</tr>
+<tr>
+<td>Links</td>
+<td>l1 to l7</td>
+</tr>
+<tr>
+<td>Chains</td>
+<td>l1 -&gt; l7</td>
+</tr>
+</tbody>
+</table>
+<p>Follow the same procedure for the right arm:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group name</td>
+<td>right_arm</td>
+</tr>
+<tr>
+<td>Kinematic Solver</td>
+<td>KDL</td>
+</tr>
+<tr>
+<td>Kin. Search Resolution</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Kin. Search Timeout</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Kin. Solver Attempts</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Joints</td>
+<td>jr1 to jr7</td>
+</tr>
+<tr>
+<td>Links</td>
+<td>r1 to r7</td>
+</tr>
+<tr>
+<td>Chains</td>
+<td>r1 -&gt; r7</td>
+</tr>
+</tbody>
+</table>
+<p>We will also add a <code>robot</code> main group that contains these two groups as subgroups:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group name</td>
+<td>robot</td>
+</tr>
+<tr>
+<td>Kinematic Solver</td>
+<td><em>none</em></td>
+</tr>
+<tr>
+<td>Kin. Search Resolution</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Kin. Search Timeout</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Kin. Solver Attempts</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>Click on <code>Add sub-groups</code> and select <code>right_arm</code> and <code>left_arm</code>.</p>
+<h3>Robot poses</h3>
+<p>We can define some poses for our robot. Lets define a 'idle' position for the dual-arm robot by clicking <code>Add Pose</code> and selecting the following values:</p>
+<p>Define an idle position for the complete robot:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pose name</td>
+<td>idle</td>
+</tr>
+<tr>
+<td>Planning Group</td>
+<td>robot</td>
+</tr>
+<tr>
+<td>jl1</td>
+<td>2.0</td>
+</tr>
+<tr>
+<td>jl2</td>
+<td>-1.5</td>
+</tr>
+<tr>
+<td>jl3</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>jl4</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>jl5</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jl6</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jl7</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jr1</td>
+<td>-2.0</td>
+</tr>
+<tr>
+<td>jr2</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>jr3</td>
+<td>-1.5</td>
+</tr>
+<tr>
+<td>jr4</td>
+<td>-1.5</td>
+</tr>
+<tr>
+<td>jr5</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jr6</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jr7</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+<p>Define idle positions for each arm:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pose name</td>
+<td>idle_left</td>
+</tr>
+<tr>
+<td>Planning Group</td>
+<td>left_arm</td>
+</tr>
+<tr>
+<td>jl1</td>
+<td>2.0</td>
+</tr>
+<tr>
+<td>jl2</td>
+<td>-1.5</td>
+</tr>
+<tr>
+<td>jl3</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>jl4</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>jl5</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jl6</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jl7</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pose name</td>
+<td>idle_right</td>
+</tr>
+<tr>
+<td>Planning Group</td>
+<td>right_arm</td>
+</tr>
+<tr>
+<td>jr1</td>
+<td>-2.0</td>
+</tr>
+<tr>
+<td>jr2</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>jr3</td>
+<td>-1.5</td>
+</tr>
+<tr>
+<td>jr4</td>
+<td>-1.5</td>
+</tr>
+<tr>
+<td>jr5</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jr6</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>jr7</td>
+<td>0.0</td>
+</tr>
+</tbody>
+</table>
+<h3>End effectors</h3>
+<p>Add two end effectors by clicking on <code>Add end-effector</code> and filling in the following parameters for the left arm:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EF Name</td>
+<td>left_gripper</td>
+</tr>
+<tr>
+<td>EF Group</td>
+<td>left_arm</td>
+</tr>
+<tr>
+<td>Parent Link</td>
+<td>l7</td>
+</tr>
+<tr>
+<td>Parent Group</td>
+<td><em>none</em></td>
+</tr>
+</tbody>
+</table>
+<p>Follow the same instructions for the right gripper:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EF Name</td>
+<td>right_gripper</td>
+</tr>
+<tr>
+<td>EF Group</td>
+<td>right_arm</td>
+</tr>
+<tr>
+<td>Parent Link</td>
+<td>r7</td>
+</tr>
+<tr>
+<td>Parent Group</td>
+<td><em>none</em></td>
+</tr>
+</tbody>
+</table>
+<h3>Configuration Files</h3>
+<p>Lets <em>dump</em> all the configuration files to a new package called <code>enesbot_dualarm_moveit</code> by creating a folder with this name in our <code>catkin_ws/src</code> directory and pressing <code>Generate Files</code>.</p>
+<p>We can exit the installer now. The tool generates all of the files that we need for using <em>Moveit!</em> as well as launch files for seeing some examples in action. For example, we can launch a like this:</p>
+<p>Build your catkin workspace:</p>
+<div class="highlight"><pre><span></span><code>catkin_make
+</code></pre></div>
+
+
+<p>and launch the demo file:</p>
+<div class="highlight"><pre><span></span><code>roslaunch enesbot_dualarm_moveit demo.launch
+</code></pre></div>
+
+
+<p><img alt="demo" src="/images/ros-moveit-tutorial_demo.png"></p>
+<p>Take some time to play with the robot, use RVIZ's interface, move the goal indicators in each of the robot's arms and plan some movements to reach those goals!</p>
+<h2>Publishing goals from Python</h2>
+<p>Now that we have a functional robot that can move its arms to desired goal states we can try to manipulate this goals straight from a Python script. For this we will use the node structure provided by <em>Moveit!</em> and publish message directly to the corresponding topics.</p>
+<h3>The <em>Moveit Commander</em></h3>
+<p>It is very easy to interact with <em>Moveit!</em> through the <code>moveit_commander</code>. With this class, the user can accomplish the most common tasks like setting joint or pose goals, path planning, moving the robot and adding obstacles to the environment.   </p>
+<p>First we declare a node that will execute <em>Moveit!</em> using the following commands:</p>
+<div class="highlight"><pre><span></span><code><span class="n">moveit_commander</span><span class="o">.</span><span class="n">roscpp_initialize</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+<span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;move_group_python_interface_tutorial&#39;</span><span class="p">,</span>
+              <span class="n">anonymous</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Declare the a variable for the <em>robot</em> and a variable for each of the arms:</p>
+<div class="highlight"><pre><span></span><code><span class="n">robot</span>  <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">RobotCommander</span><span class="p">()</span>
+<span class="n">groupL</span> <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">MoveGroupCommander</span><span class="p">(</span><span class="s2">&quot;left_arm&quot;</span> <span class="p">)</span>
+<span class="n">groupR</span> <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">MoveGroupCommander</span><span class="p">(</span><span class="s2">&quot;right_arm&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Lets create a message of type <code>geometry_msgs.msg.Pose()</code> and populate it with some values:</p>
+<div class="highlight"><pre><span></span><code><span class="n">targetL</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Pose</span><span class="p">()</span>
+<span class="n">targetL</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">targetL</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">targetL</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">targetL</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">groupL</span><span class="o">.</span><span class="n">set_joint_value_target</span><span class="p">(</span><span class="n">targetL</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Finally, lets execute the planning and the moving commands:</p>
+<div class="highlight"><pre><span></span><code><span class="n">planL</span> <span class="o">=</span> <span class="n">groupL</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+<span class="n">groupL</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">planL</span><span class="p">)</span>
+</code></pre></div>
+
+
+<h3>Python script</h3>
+<p>The complete Python script (both arms) is shown below:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">moveit_commander</span>
+<span class="kn">import</span> <span class="nn">moveit_msgs.msg</span>
+<span class="kn">import</span> <span class="nn">geometry_msgs.msg</span>
+
+<span class="k">def</span> <span class="nf">move_to_goal</span><span class="p">():</span>
+
+    <span class="c1"># Set-up</span>
+    <span class="n">moveit_commander</span><span class="o">.</span><span class="n">roscpp_initialize</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;move_group_python_interface_tutorial&#39;</span><span class="p">,</span>
+                  <span class="n">anonymous</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># declarations</span>
+    <span class="n">robot</span> <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">RobotCommander</span><span class="p">()</span>
+    <span class="n">groupL</span> <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">MoveGroupCommander</span><span class="p">(</span><span class="s2">&quot;left_arm&quot;</span> <span class="p">)</span>
+    <span class="n">groupR</span> <span class="o">=</span> <span class="n">moveit_commander</span><span class="o">.</span><span class="n">MoveGroupCommander</span><span class="p">(</span><span class="s2">&quot;right_arm&quot;</span><span class="p">)</span>
+
+    <span class="c1"># set target for left arm</span>
+    <span class="n">targetL</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Pose</span><span class="p">()</span>
+    <span class="n">targetL</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">targetL</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="n">targetL</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="n">targetL</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="n">groupL</span><span class="o">.</span><span class="n">set_joint_value_target</span><span class="p">(</span><span class="n">targetL</span><span class="p">)</span>
+
+    <span class="n">planL</span> <span class="o">=</span> <span class="n">groupL</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+
+    <span class="n">groupL</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">planL</span><span class="p">)</span>
+
+    <span class="n">groupL</span><span class="o">.</span><span class="n">clear_pose_targets</span><span class="p">()</span>
+
+    <span class="c1"># set target for right arm</span>
+    <span class="n">targetR</span> <span class="o">=</span> <span class="n">geometry_msgs</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">Pose</span><span class="p">()</span>
+    <span class="n">targetR</span><span class="o">.</span><span class="n">orientation</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">targetR</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span>  <span class="mf">0.2</span>
+    <span class="n">targetR</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.2</span>
+    <span class="n">targetR</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span>  <span class="mf">0.2</span>
+    <span class="n">groupR</span><span class="o">.</span><span class="n">set_joint_value_target</span><span class="p">(</span><span class="n">targetR</span><span class="p">)</span>
+
+    <span class="n">planR</span> <span class="o">=</span> <span class="n">groupR</span><span class="o">.</span><span class="n">plan</span><span class="p">()</span>
+
+    <span class="n">groupR</span><span class="o">.</span><span class="n">clear_pose_targets</span><span class="p">()</span>
+
+    <span class="n">groupR</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">planR</span><span class="p">)</span>
+
+
+<span class="nb">print</span> <span class="s2">&quot;============ Waiting for RVIZ...&quot;</span>
+<span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span> <span class="s2">&quot;============ Starting tutorial &quot;</span>
+<span class="n">move_to_goal</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>Save the file as <code>moveit_goal.py</code> in the <code>/nodes</code> directory of the <code>enesbot_dualarm</code> package.</p>
+<p>Do not forget to make it executable with the following command:</p>
+<div class="highlight"><pre><span></span><code>chmod +x nodes/moveit_goal.py
+</code></pre></div>
+
+
+<h3>ROS Launch File</h3>
+<p>The following launch file starts the necessary nodes for using <em>Moveit!</em> and starts the python script we just made.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;launch&gt;</span>
+
+  <span class="c">&lt;!-- Load the URDF, SRDF and other .yaml configuration files on the param server --&gt;</span>
+  <span class="nt">&lt;include</span> <span class="na">file=</span><span class="s">&quot;$(find enesbot_dualarm)/launch/planning_context.launch&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;arg</span> <span class="na">name=</span><span class="s">&quot;load_robot_description&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/include&gt;</span>
+
+  <span class="c">&lt;!-- We do not have a robot connected, so publish fake joint states --&gt;</span>
+  <span class="nt">&lt;node</span> <span class="na">name=</span><span class="s">&quot;joint_state_publisher&quot;</span> <span class="na">pkg=</span><span class="s">&quot;joint_state_publisher&quot;</span> <span class="na">type=</span><span class="s">&quot;joint_state_publisher&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;rosparam</span> <span class="na">param=</span><span class="s">&quot;/source_list&quot;</span><span class="nt">&gt;</span>[/move_group/fake_controller_joint_states]<span class="nt">&lt;/rosparam&gt;</span>
+  <span class="nt">&lt;/node&gt;</span>
+
+  <span class="c">&lt;!-- Given the published joint states, publish tf for the robot links --&gt;</span>
+  <span class="nt">&lt;node</span> <span class="na">name=</span><span class="s">&quot;robot_state_publisher&quot;</span> <span class="na">pkg=</span><span class="s">&quot;robot_state_publisher&quot;</span> <span class="na">type=</span><span class="s">&quot;robot_state_publisher&quot;</span> <span class="na">respawn=</span><span class="s">&quot;true&quot;</span> <span class="na">output=</span><span class="s">&quot;screen&quot;</span> <span class="nt">/&gt;</span>
+
+  <span class="c">&lt;!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) --&gt;</span>
+  <span class="nt">&lt;include</span> <span class="na">file=</span><span class="s">&quot;$(find enesbot_dualarm)/launch/move_group.launch&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;arg</span> <span class="na">name=</span><span class="s">&quot;allow_trajectory_execution&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;arg</span> <span class="na">name=</span><span class="s">&quot;fake_execution&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;arg</span> <span class="na">name=</span><span class="s">&quot;info&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/include&gt;</span>
+
+
+  <span class="c">&lt;!-- Run Rviz and load the default config to see the state of the move_group node --&gt;</span>
+  <span class="nt">&lt;include</span> <span class="na">file=</span><span class="s">&quot;$(find enesbot_dualarm)/launch/moveit_rviz.launch&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;arg</span> <span class="na">name=</span><span class="s">&quot;config&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/include&gt;</span>
+
+  <span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;enesbot_dualarm&quot;</span>       <span class="na">name=</span> <span class="s">&quot;moveit_basic&quot;</span>        <span class="na">type=</span><span class="s">&quot;moveit_goal.py&quot;</span>         <span class="na">output=</span><span class="s">&quot;screen&quot;</span><span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/launch&gt;</span>
+</code></pre></div>
+
+
+<p>Don't forget to make the Python script executable before using the launch file.</p>
+<div class="highlight"><pre><span></span><code>chmod +x moveit_goal.py
+</code></pre></div>
+
+
+<p><img alt="moveit_action" src="/images/ros-moveit-tutorial_rviz.png"></p>
+    </article>
+
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

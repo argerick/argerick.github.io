@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Cómo crear un SmartComponent desde Visual Studio:</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Es posible crear un SmartComponent desde Visual Studio y usar el archivo **.rslib** en RobotStudio. Este post explica cómo crear un...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="ABB">
+        <meta name="tags" content="RobotStudio">
+        <meta name="tags" content="SmartComponent">
+        <meta name="tags" content="VisualStudio">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/drafts/como-crear-un-smartcomponent-desde-visual-studio.html">
+	<meta property="og:title" content="Cómo crear un SmartComponent desde Visual Studio:">
+	<meta property="article:published_time" content="2016-08-09 10:02:00-05:00">
+            <meta property="og:description" content="Es posible crear un SmartComponent desde Visual Studio y usar el archivo **.rslib** en RobotStudio. Este post explica cómo crear un...">
+
+            <meta property="og:image" content="images/cover.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-como-crear-un-smartcomponent-desde-visual-studio">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Cómo crear un SmartComponent desde Visual Studio:</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Tue 09 August 2016
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p style="text-align: justify;">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gist-embed/2.4/gist-embed.min.js" type="text/javascript"></script>
+Es posible crear un SmartComponent desde Visual Studio y usar el archivo
+**.rslib** en RobotStudio. Este post explica cómo crear un componente
+inteligente, modificar sus propiedades y usar algunos de los métodos que
+la clase *SmartComponent* pone a nuestra disposición.
+
+</p>
+
+<p>Crearemos un componente inteligente muy simple que tome un <em>string</em>
+llamado <em>Name</em> y, al ejecutarse por medio de un botón llamado <em>Greet</em>,
+nos despliegue un mensaje de saludo en RobotStudio.</p>
+<p>Para que este tutorial funcione, se necesita tener instalado RobotStudio
+junto con su SDK.</p>
+<!--more-->
+
+<h2 id="un-poco-de-teoría" style="text-align: justify;">Un poco de teoría</h2>
+<p><strong>Nota:</strong> Para efectos de este post, el SmartComponent que crearemos
+tendrá el nombre de <em>SayHello</em>.</p>
+<p>Los SmartComponents creados en Visual Studio constan de tres
+partes principales:</p>
+<ul>
+<li><strong>Codebehind.cs:</strong> es el archivo de C# que contiene el código
+    fuente de nuestro componente.</li>
+<li><strong>SayHello.xml: </strong>es un archivo XML que contiene las propiedades del
+    componente, tales como <em>IO Signals</em>, <em>Dynamic Properties</em>, <em>Graphic
+    Components</em>, etc.</li>
+<li><strong>SayHello.en.xml: </strong>estos archivos sirven para "localizar" nuestro
+    componente de acuerdo al idioma que se encuentre en uso
+    en RobotStudio.</li>
+</ul>
+<p>En cuanto al funcionamiento de estos componentes, los SmartComponents
+que son creados en RobotStudio implementan sus funcionalidades al
+ejecutar alguna de las funciones que heredan de la clase
+<em>SmartComponentCodeBehind. </em>Entre estas funciones se
+encuentra <em>OnIOSignalValueChanged</em>, que es la función que usaremos para
+que nuestro componente reaccione cada vez que accionemos su
+botón. <em>OnIOSignalValueChanged </em>recibe como argumentos la señal que
+cambió, junto con el componente que posee la señal (útil cuando un
+componente es utilizado en más de una instancia).</p>
+<h2 id="procedimiento" style="text-align: justify;">Procedimiento</h2>
+<ol>
+<li>Comencemos creando un <em>SmartComponent Project</em> en Visual Studio.
+    Como ya mencionamos, utilizaremos el nombre <em>SayHello</em> para nuestro
+    componente. <img alt="Capture1" src="http://www.enesbot.com/wp-content/uploads/2016/08/Capture1.png">{.aligncenter
+    .size-full .wp-image-92 width="1227" height="853"}</li>
+<li>Una vez creado el proyecto, modifica el archivo <em>SayHello.xml</em> para
+    que contenga las señales y propiedades dinámicas
+    deseadas.<img alt="Capture2" src="http://www.enesbot.com/wp-content/uploads/2016/08/Capture2-1.png">{.aligncenter
+    .size-full .wp-image-94 width="274" height="415"} Añade una señal de
+    entrada digital que se llame <em>Greet.</em>Usamos el atributo <em>autoReset</em>
+    para que la señal regrese a su estado original ("0" o <em>falso</em>) cada
+    vez que sea activada, generando así un comportamiento de <em>push
+    button</em>.<img alt="Capture3" src="http://www.enesbot.com/wp-content/uploads/2016/08/Capture3-1.png">{.aligncenter
+    .size-full .wp-image-95 width="274" height="417"}</li>
+<li>Añade una propiedad dinámica que se llame <em>Name</em>, del tipo string,
+    valor inicial "" (String vacía). El atributo <em>AutoApply</em> hace que no
+    sea necesario presionar el botón <em>Apply </em>cada vez que queramos
+    cambiar el valor de la propiedad.</li>
+<li>Finalmente añade un <em>Asset</em> que contenga el <em>assembly</em> (el .dll) de
+    nuestro componente:  El contenido completo de <em>SayHello.xml</em> es<em>:</em></li>
+<li>Una vez que tenemos listo el archivo con las propiedades de nuestro
+    componente, proseguiremos a escribir [el código que dictará el
+    comportamiento del mismo dentro de RobotStudio. En el
+    archivo CodeBehind.cs, añade un <em>override</em> del
+    método <em>OnIOSignalValueChanged.</em>]{style="line-height: 1.6471;"}</li>
+<li>Dentro de esta función, primero comprobaremos que la señal que haya
+    cambiado sea, en efecto, <em>Greet.</em> También verificaremos si el valor
+    que tiene la señal en ese momento es 1, dado que solo queremos
+    actuar cuando el botón es accionado (valor 1), no cuando regresa a
+    su posición original (valor 0).  </li>
+<li>Las propiedades de un componente están indexadas en la propiedad
+    <em>Properties</em>, por lo que <em>Properties[0]</em> entrega la primer
+    propiedad de nuestro componente que es, en nuestro caso, <em>Name. L</em>a
+    propiedad <em>Value</em> entrega el valor de <em>Name</em>, y finalmente usamos la
+    función <em>.toString() </em>[para convertirlo en un string que podamos
+    manipular con las otras funciones de
+    C#.]{style="line-height: 1.6471;"}</li>
+<li>Finalmente añadimos el string a un mensaje en el logger de
+    RobotStudio:</li>
+<li>Una vez finalizado el último paso, compilamos el proyecto y
+    generamos el archivo .rslib que contiene a nuestro
+    componente. <img alt="Capture4" src="http://www.enesbot.com/wp-content/uploads/2016/08/Capture4-1-e1470730422265.png">{.aligncenter
+    .size-full .wp-image-93 width="273" height="423"}</li>
+</ol>
+<p>El código completo del archivo <em>CodeBehind.cs</em> es el siguiente:  </p>
+<p>Al compilar el proyecto, VisualStudio utiliza el <em>LibraryCompiler</em> de
+ABB para<br>
+generar un archivo .rslib a partir de el código C# y los archivos
+XML. Podemos abrir este archivo en RobotStudio y así cargar el
+componente en nuestra estación.</p>
+<p style="text-align: justify;">
+Como ya mencionamos, los otros archivos XML sirven para proporcionar
+traducciones de la interfaz gráfica y de otros recursos dependiendo del
+lenguaje de RobotStudio.  
+Podemos escribir la siguiente información en *SayHello.en.xml* para
+proporcionar una breve descripción de nuestro componente y sus
+propiedades.
+
+De la misma manera, podemos crear un archivo llamado *SayHello.es.xml* y
+escribir la misma información pero en español.  
+
+<script src="https://gist.github.com/sevieyra/fbc28f843ec9460ce99f5d5711ca8216.js"></script>
+</p>
+
+<p>El <em>LibraryCompiler</em> de ABB detectará este archivo automáticamente y lo
+integrará en nuestro archivo .rslib.</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/abb.html">ABB</a>, <a href="/tag/robotstudio.html">RobotStudio</a>, <a href="/tag/smartcomponent.html">SmartComponent</a>, <a href="/tag/visualstudio.html">VisualStudio</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

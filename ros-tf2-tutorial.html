@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>ROS TF tutorial</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="TF is a transform library that keeps track of one or several coordinate frames of a robot (or a multi-robot system). The TF2 package is...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="ROS">
+        <meta name="tags" content="RVIZ">
+        <meta name="tags" content="tutorial">
+        <meta name="tags" content="URDF">
+        <meta name="tags" content="xacro">
+        <meta name="tags" content="tf2">
+        <meta name="tags" content="tf">
+        <meta name="tags" content="moveit">
+        <meta name="tags" content="ros-industrial">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/ros-tf2-tutorial.html">
+	<meta property="og:title" content="ROS TF tutorial">
+	<meta property="article:published_time" content="2017-06-28 14:24:00-05:00">
+            <meta property="og:description" content="TF is a transform library that keeps track of one or several coordinate frames of a robot (or a multi-robot system). The TF2 package is...">
+
+                <meta property="og:image" content="/images/ros-tf-tutorial_cover.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-ros-tf2-tutorial">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>ROS TF tutorial</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Wed 28 June 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p><a href="http://wiki.ros.org/tf2">TF</a> is a transform library that keeps track of one or several coordinate frames of a robot (or a multi-robot system). The TF2 package is the successor of TF and is one of the most basic (and useful) packages in ROS.</p>
+<p>TF2 nodes communicate with each other by sending messages that contain a transformation from one frame to another. In standard robotics terms, this means sending a translation and a rotation regarding a base frame.</p>
+<p>We will write a node that displays the frame info of right end effector of the last tutorial's <a href="/creating-a-dual-arm-manipulator-in-ROS.html">dual-arm robot</a> while we display the frame's info of the left hand with TF2 built-in tools.</p>
+<p><img alt="cover" src="/images/ros-tf-tutorial_cover.png"></p>
+<h2>Requirements</h2>
+<h3>Installing the <em>enesbot_dualarm</em> package</h3>
+<p>Lets start by downloading the <a href="https://github.com/sevieyra/enesbot_dualarm">enesbot_dualarm</a> package to our <code>catkin_ws/src</code> directory:</p>
+<div class="highlight"><pre><span></span><code>git clone https://github.com/sevieyra/enesbot_dualarm.git
+</code></pre></div>
+
+
+<p>We can verify that everything is in order by building our catkin workspace</p>
+<div class="highlight"><pre><span></span><code>catkin_make
+</code></pre></div>
+
+
+<p>... and launching the package:</p>
+<div class="highlight"><pre><span></span><code>roslaunch enesbot_dualarm display.launch
+</code></pre></div>
+
+
+<p>A window running RVIZ should appear displaying the URDF file or the dual-arm robot.</p>
+<h2>Using TF2</h2>
+<p>Now that we have our set-up ready, lets start to get the information from TF2.</p>
+<h3>Visualizing TF2 data</h3>
+<p>We can easily display the frames with their hierarchy if we use a tool called <em>view_frames</em>.</p>
+<div class="highlight"><pre><span></span><code>rosrun tf view_frames
+</code></pre></div>
+
+
+<p>The last command will generate a <em>pdf</em> file with the coordinate frames of our robot system:</p>
+<p><img alt="view_frames" src="/images/ros-tf-tutorial_view_frames.png"></p>
+<p>As with any other ROS tools and packages, TF2 allows to display the topic and messages that it is using. A quick <code>rostopic list</code> reveals that TF has created a topic called <code>/tf</code> where all the information regarding the robot's frames is being published.</p>
+<div class="highlight"><pre><span></span><code>rostopic list
+</code></pre></div>
+
+
+<p>We can also see the type of messages and sent, the publisher and the subscribers of the topic if we use <code>rostopic info</code></p>
+<div class="highlight"><pre><span></span><code>rostopic info tf
+</code></pre></div>
+
+
+<p>An interactive tree view can be accessed through the <code>rqt</code> tool by using the following command:</p>
+<div class="highlight"><pre><span></span><code>rosrun rqt_tf_tree rqt_tf_tree
+</code></pre></div>
+
+
+<p>We can see the transformation between different frames by using <code>tf_echo</code>. The syntax to use this command is <code>tf_echo [reference frame] [target frame]</code>. Lets check the transform from the robots base to the right end-effector:</p>
+<div class="highlight"><pre><span></span><code>rosrun tf tf_echo root l7
+</code></pre></div>
+
+
+<p>We get the following output, which shows the translation and the rotation that the frame from the end-effector has in comparison to the base of our robot:</p>
+<div class="highlight"><pre><span></span><code>At <span class="nb">time</span> <span class="m">1498560455</span>.588
+- Translation: <span class="o">[</span><span class="m">0</span>.450, -0.410, <span class="m">0</span>.700<span class="o">]</span>
+- Rotation: in Quaternion <span class="o">[</span>-0.067, -0.250, -0.250, <span class="m">0</span>.933<span class="o">]</span>
+            in RPY <span class="o">(</span>radian<span class="o">)</span> <span class="o">[</span><span class="m">0</span>.000, -0.524, -0.524<span class="o">]</span>
+            in RPY <span class="o">(</span>degree<span class="o">)</span> <span class="o">[</span><span class="m">0</span>.000, -30.000, -30.000<span class="o">]</span>
+</code></pre></div>
+
+
+<p>Move the robot with the GUI from the join state publisher in order to see how the TF2 data changes!</p>
+<h3>TF2 data from Python</h3>
+<p>Writing a script that displays TF2 information is easily achieved using python implementations of ROS commands. Create a Python script called <code>nodes/tf_subscriber.py</code>.</p>
+<div class="highlight"><pre><span></span><code>mkdir nodes
+gedit nodes/tf_subscriber.py
+</code></pre></div>
+
+
+<p>The next script creates a buffer, a listener and prints all the data it gets from TF:</p>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">tf2_ros</span>
+
+<span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;my_tf_listener&#39;</span><span class="p">)</span>
+
+<span class="c1"># create a tf2_ros type buffer</span>
+<span class="n">tfBuffer</span> <span class="o">=</span> <span class="n">tf2_ros</span><span class="o">.</span><span class="n">Buffer</span><span class="p">()</span>
+<span class="c1"># create a TF2 transform listener object. Save data into tfBuffer</span>
+<span class="n">listener</span> <span class="o">=</span> <span class="n">tf2_ros</span><span class="o">.</span><span class="n">TransformListener</span><span class="p">(</span><span class="n">tfBuffer</span><span class="p">)</span>
+
+<span class="n">rate</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Rate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># rate at 1 hz</span>
+
+<span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get last ( Time(0) )transform from the base frame to frame l7</span>
+        <span class="n">frame_info</span> <span class="o">=</span> <span class="n">tfBuffer</span><span class="o">.</span><span class="n">lookup_transform</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="s1">&#39;l7&#39;</span><span class="p">,</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Time</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="n">frame_info</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="n">tf2_ros</span><span class="o">.</span><span class="n">TransformException</span><span class="p">):</span>
+        <span class="n">rate</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span>
+        <span class="k">continue</span>
+
+    <span class="n">rate</span><span class="o">.</span><span class="n">sleep</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p><strong>Do not</strong> forget to make the node executable:</p>
+<div class="highlight"><pre><span></span><code>chmod +x nodes/tf_subscriber.py
+</code></pre></div>
+
+
+<p>Lets check the code part by part.</p>
+<p>In the first statement, we start a node called "my_tf_listener"</p>
+<div class="highlight"><pre><span></span><code><span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;my_tf_listener&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>... create a buffer for receiving <code>tf2_ros</code> data and create a listener using the <code>tf2_ros.TransformListener</code> function (passing the buffer as an argument).</p>
+<div class="highlight"><pre><span></span><code><span class="n">tfBuffer</span> <span class="o">=</span> <span class="n">tf2_ros</span><span class="o">.</span><span class="n">Buffer</span><span class="p">()</span>
+<span class="n">listener</span> <span class="o">=</span> <span class="n">tf2_ros</span><span class="o">.</span><span class="n">TransformListener</span><span class="p">(</span><span class="n">tfBuffer</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Then we set the update rate to 1 hertz with</p>
+<div class="highlight"><pre><span></span><code><span class="n">rate</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Rate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Inside the loop, which will run until a stop signal is sent to ROS thanks to the <code>while not rospy.is_shutdown():</code> statement, we get the TF2 transform from <em>root</em> to <em>l7</em> which are the base and left end-effector getting the most recent data from the buffer (as indicated by <code>rospy.Time(0)</code>).</p>
+<div class="highlight"><pre><span></span><code><span class="n">frame_info</span> <span class="o">=</span> <span class="n">tfBuffer</span><span class="o">.</span><span class="n">lookup_transform</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">,</span> <span class="s1">&#39;l7&#39;</span><span class="p">,</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Time</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</code></pre></div>
+
+
+<p>An exception handling routine follows and finally, we put our listener to sleep in order to wake up again with a frequency of 1 hertz thanks to the <code>rate.sleep()</code> statement.</p>
+<h3>Creating a Launch File</h3>
+<p>Finally, lets write a <em>launch file</em> that helps us start the python node and the <code>tf_echo</code> node to visualize the result in RVIZ:</p>
+<div class="highlight"><pre><span></span><code>gedit launch/tf_tutorial.launch
+</code></pre></div>
+
+
+<p>Write the following inside the launch file:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;launch&gt;</span>
+
+  <span class="nt">&lt;arg</span> <span class="na">name=</span> <span class="s">&quot;model&quot;</span>            <span class="na">default=</span> <span class="s">&quot;$(find enesbot_dualarm)/urdf/enesbot_dualarm.xacro&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;arg</span> <span class="na">name=</span> <span class="s">&quot;rvizconfig&quot;</span> <span class="na">default=</span> <span class="s">&quot;$(find enesbot_dualarm)/rviz/conf.rviz&quot;</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;param</span> <span class="na">name=</span> <span class="s">&quot;robot_description&quot;</span>    <span class="na">command=</span> <span class="s">&quot;$(find xacro)/xacro $(arg model) --inorder&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;param</span> <span class="na">name=</span> <span class="s">&quot;use_gui&quot;</span>                      <span class="na">value=</span>   <span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;rviz&quot;</span> <span class="na">required=</span><span class="s">&quot;true&quot;</span>  <span class="na">name=</span> <span class="s">&quot;rviz&quot;</span>                  <span class="na">type=</span> <span class="s">&quot;rviz&quot;</span>        <span class="na">args=</span><span class="s">&quot;-d $(arg rvizconfig)&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;robot_state_publisher&quot;</span> <span class="na">name=</span> <span class="s">&quot;robot_state_publisher&quot;</span> <span class="na">type=</span><span class="s">&quot;robot_state_publisher&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;joint_state_publisher&quot;</span> <span class="na">name=</span> <span class="s">&quot;joint_state_publisher&quot;</span> <span class="na">type=</span><span class="s">&quot;joint_state_publisher&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;enesbot_dualarm&quot;</span>       <span class="na">name=</span> <span class="s">&quot;my_tf_listener&quot;</span>        <span class="na">type=</span><span class="s">&quot;tf_subscriber.py&quot;</span>         <span class="na">output=</span><span class="s">&quot;screen&quot;</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;tf&quot;</span>                    <span class="na">name=</span> <span class="s">&quot;tf_echo&quot;</span>               <span class="na">type=</span> <span class="s">&quot;tf_echo&quot;</span> <span class="na">args=</span><span class="s">&quot;root r7 1&quot;</span> <span class="na">output=</span><span class="s">&quot;screen&quot;</span> <span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/launch&gt;</span>
+</code></pre></div>
+
+
+<p>This is the same launch file used for displaying the dual-arm robot. We have added two extra lines that help us execute the desired nodes:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;enesbot_dualarm&quot;</span>       <span class="na">name=</span> <span class="s">&quot;my_tf_listener&quot;</span>        <span class="na">type=</span><span class="s">&quot;tf_subscriber.py&quot;</span>         <span class="na">output=</span><span class="s">&quot;screen&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;node</span> <span class="na">pkg=</span><span class="s">&quot;tf&quot;</span>                    <span class="na">name=</span> <span class="s">&quot;tf_echo&quot;</span>               <span class="na">type=</span> <span class="s">&quot;tf_echo&quot;</span> <span class="na">args=</span><span class="s">&quot;root r7 1&quot;</span> <span class="na">output=</span><span class="s">&quot;screen&quot;</span> <span class="nt">/&gt;</span>
+</code></pre></div>
+
+
+<p>This lines tells us that we are going to launch a <code>node</code> from a <code>pkg</code> called <em>enesbot_dualarm</em> and <em>tf</em> respectively. The <code>name</code> given to these nodes will be <em>my_tf_listener</em> and <em>tf_echo</em>, and they are executed by running <em>tf_subscriber.py</em> and <em>tf_echo</em> respectively, as stated in the <code>type</code> argument. Finally, we will send their <code>output</code> through the <em>screen</em> (terminal).</p>
+<p>Don't forget you can clone the project's repository from <a href="https://github.com/sevieyra/enesbot_dualarm">Github</a>!</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/ros.html">ROS</a>, <a href="/tag/rviz.html">RVIZ</a>, <a href="/tag/tutorial.html">tutorial</a>, <a href="/tag/urdf.html">URDF</a>, <a href="/tag/xacro.html">xacro</a>, <a href="/tag/tf2.html">tf2</a>, <a href="/tag/tf.html">tf</a>, <a href="/tag/moveit.html">moveit</a>, <a href="/tag/ros-industrial.html">ros-industrial</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

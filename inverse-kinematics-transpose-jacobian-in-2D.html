@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Inverse kinematics: Transpose Jacobian in 2D</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="One of the most simple methods to compute the inverse kinematics of a robot is the transpose Jacobian This is an iterative method in...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="kinematics">
+        <meta name="tags" content="inverse kinematics">
+        <meta name="tags" content="jacobian">
+        <meta name="tags" content="python">
+        <meta name="tags" content="robot">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/inverse-kinematics-transpose-jacobian-in-2D.html">
+	<meta property="og:title" content="Inverse kinematics: Transpose Jacobian in 2D">
+	<meta property="article:published_time" content="2016-12-29 23:48:00-06:00">
+            <meta property="og:description" content="One of the most simple methods to compute the inverse kinematics of a robot is the transpose Jacobian This is an iterative method in...">
+
+                <meta property="og:image" content="/inverse-kinematics-transpose-jacobian-in-2D_PID.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-inverse-kinematics-transpose-jacobian-in-2D">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Inverse kinematics: Transpose Jacobian in 2D</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Thu 29 December 2016
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>One of the most simple methods to compute the inverse kinematics of a robot is the <em>transpose Jacobian</em>
+This is an iterative method in which the properties of the Jacobian are used to iteratively calculate the values that the robot's joints must have in order to reach a desired state. In this blog post we will create a simple closed-loop algorithm employing the Jacobian to make our robot reach its goal position.</p>
+<h2>A little bit of theory...</h2>
+<p>We will talk <em>very</em> briefly about the two fundamental concepts needed to create our algorithm: The Jacobian and <em>the control loop</em>.</p>
+<h3>The Jacobian</h3>
+<p>In robotics, and specifically in our case, the Jacobian is a matrix composed by the partial derivatives of the functions that describe the state of the end effector depending on the joint positions of the robot.</p>
+<p>For the 2D robot with 3 joints that we will use, the end effector's state can be described as a function of <span class="math">\(x\)</span>,<span class="math">\(y\)</span> and <span class="math">\(α\)</span>, where the first two values represent coordinates in the <span class="math">\(XY\)</span> plane and <span class="math">\(α\)</span> represents the angle. Therefore we can write the Jacobian in the following way:</p>
+<div class="math">$$J = \left[ \begin{array} {ccc}
+\frac{\delta x}{\delta q_1}&amp;\frac{\delta x}{\delta q_2} &amp;\frac{\delta x}{\delta q_3}\\
+\frac{\delta y}{\delta q_1}&amp;\frac{\delta y}{\delta q_2} &amp;\frac{\delta y}{\delta q_3}\\
+\frac{\delta \alpha}{\delta q_1}&amp;\frac{\delta \alpha}{\delta q_2} &amp;\frac{\delta \alpha}{\delta q_3}\\
+\end{array} \right]$$</div>
+<h3>The control loop</h3>
+<p>Using a simple Python loop, we will implement a control loop where we will read reference values (the goal), and using the Jacobian we will get how fast <span class="math">\(x\)</span>,<span class="math">\(y\)</span> and <span class="math">\(α\)</span> converge to the aforementioned goal values depending on the changes of the joint values that form the Jacobian.</p>
+<p><img alt="PID" src="/images/inverse-kinematics-transpose-jacobian-in-2D_PID.png"></p>
+<p>If we multiply the derivatives times the difference between the goal values and the current values (the error), we get the magnitude of the change that we need to apply to the individual joint values in order to minimize this error during the next iteration.</p>
+<div class="math">$$J^t \left[ \begin{array} {c} e_x\\ e_y\\ e_\alpha\\ \end{array} \right] =
+\left[ \begin{array} {c} \delta_{q1}\\ \delta_{q2}\\ \delta_{q3}\\ \end{array} \right]$$</div>
+<div class="math">$$Q_(new) = \delta Q  + Q$$</div>
+<h2>Implementation</h2>
+<p>This script moves a 2D robot from its original position to a predefined goal.
+There is a subroutine that computes a transpose Jacobian and uses it to calculate the values that the robot must adopt in order to get closer to its goal. Later posts will show how to compute the inverse kinematics for a more complex robot.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="k">def</span> <span class="nf">dk</span><span class="p">(</span><span class="n">Q</span><span class="p">):</span> <span class="c1"># returns the frames as well as x,y and a</span>
+    <span class="n">q1</span><span class="p">,</span><span class="n">q2</span><span class="p">,</span><span class="n">q3</span> <span class="o">=</span> <span class="n">Q</span>
+    <span class="n">T01</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([[</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>   <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                      <span class="p">[</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q1</span><span class="p">),</span><span class="mi">0</span> <span class="p">],</span>
+                      <span class="p">[</span><span class="mi">0</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">]])</span>
+    <span class="n">T12</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([[</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>   <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span> <span class="mi">5</span><span class="p">],</span>
+                      <span class="p">[</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q2</span><span class="p">),</span><span class="mi">0</span> <span class="p">],</span>
+                      <span class="p">[</span><span class="mi">0</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">]])</span>
+    <span class="n">T23</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span> <span class="p">([[</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span>   <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span> <span class="mi">5</span><span class="p">],</span>
+                      <span class="p">[</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span>  <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">q3</span><span class="p">),</span><span class="mi">0</span> <span class="p">],</span>
+                      <span class="p">[</span><span class="mi">0</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>  <span class="mi">1</span><span class="p">]])</span>
+    <span class="n">T02</span> <span class="o">=</span> <span class="n">T01</span><span class="o">*</span><span class="n">T12</span>     <span class="c1">#frame to the second joint</span>
+    <span class="n">T03</span> <span class="o">=</span> <span class="n">T01</span><span class="o">*</span><span class="n">T12</span><span class="o">*</span><span class="n">T23</span> <span class="c1">#frame to the third  joint</span>
+    <span class="c1">#return T T T x y a</span>
+    <span class="k">return</span> <span class="n">T03</span><span class="p">,</span><span class="n">T02</span><span class="p">,</span><span class="n">T01</span><span class="p">,</span> <span class="n">T03</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">T03</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">T03</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">T03</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">drawRobot</span><span class="p">(</span><span class="n">T3</span><span class="p">,</span><span class="n">T2</span><span class="p">,</span><span class="n">T1</span><span class="p">):</span>
+    <span class="c1">#plot lines between joints</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">T2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span>       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">T2</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span>       <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">T2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">T3</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span> <span class="p">[</span><span class="n">T2</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span><span class="n">T3</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">12</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">12</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">get_jacobian</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="n">q1</span><span class="p">,</span><span class="n">q2</span><span class="p">,</span><span class="n">q3</span> <span class="o">=</span> <span class="n">Q</span>
+    <span class="n">Ja</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">],[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+
+        <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="p">,</span> <span class="n">a1</span><span class="o">=</span> <span class="n">dk</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+        <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">delta</span>
+
+        <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">delta</span>
+        <span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="p">,</span> <span class="n">a2</span><span class="o">=</span> <span class="n">dk</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+        <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">y1</span> <span class="o">-</span> <span class="n">y2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">a1</span> <span class="o">-</span> <span class="n">a2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">delta</span><span class="p">)</span>
+
+        <span class="c1">#populate Jacobian</span>
+        <span class="n">Ja</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">Ja</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">Ja</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="k">return</span> <span class="n">Ja</span>
+
+<span class="n">target_x</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">target_y</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">target_a</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([[</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">6</span><span class="p">]</span> <span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">])</span> <span class="c1"># initial state</span>
+
+<span class="n">T03</span><span class="p">,</span><span class="n">T02</span><span class="p">,</span><span class="n">T01</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">a</span> <span class="o">=</span> <span class="n">dk</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">target_x</span><span class="p">,</span><span class="n">target_y</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="c1"># goal</span>
+<span class="n">drawRobot</span> <span class="p">(</span><span class="n">T03</span><span class="p">,</span> <span class="n">T02</span><span class="p">,</span> <span class="n">T01</span><span class="p">)</span> <span class="c1"># Draw root</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">d</span> <span class="o">=</span> <span class="mf">0.001</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span> <span class="p">(</span><span class="mi">500</span><span class="p">):</span>
+
+    <span class="c1">#get error</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">([</span> <span class="p">[</span><span class="n">target_x</span> <span class="o">-</span> <span class="n">x</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">target_y</span> <span class="o">-</span> <span class="n">y</span><span class="p">],</span>
+                    <span class="p">[</span><span class="n">target_a</span> <span class="o">-</span> <span class="n">a</span><span class="p">]])</span>
+
+    <span class="c1">#Compute jacobian</span>
+    <span class="n">J</span> <span class="o">=</span> <span class="n">get_jacobian</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span><span class="mf">0.001</span><span class="p">)</span>
+    <span class="n">Jt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">J</span><span class="p">)</span> <span class="c1">#traspose Jacobian</span>
+
+    <span class="c1"># get deltaQ and</span>
+    <span class="n">dQ</span> <span class="o">=</span>  <span class="n">Jt</span> <span class="o">*</span> <span class="n">E</span><span class="o">*</span><span class="mf">0.005</span>
+    <span class="c1">#... use it to update current values</span>
+    <span class="n">Q</span> <span class="o">=</span>  <span class="n">dQ</span> <span class="o">+</span> <span class="n">Q</span>
+
+    <span class="c1">#drawRobot (T03, T02, T01) #uncomment to see the robot moving</span>
+
+    <span class="c1"># get new robot states</span>
+    <span class="n">T03</span><span class="p">,</span><span class="n">T02</span><span class="p">,</span><span class="n">T01</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">a</span> <span class="o">=</span> <span class="n">dk</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">target_x</span><span class="p">,</span><span class="n">target_y</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="c1">#goal</span>
+<span class="n">drawRobot</span> <span class="p">(</span><span class="n">T03</span><span class="p">,</span> <span class="n">T02</span><span class="p">,</span> <span class="n">T01</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p><em>Note: The code itself can be modified to visualize the robot or to get different plots. Take a look at the source code and it's comments.</em></p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/kinematics.html">kinematics</a>, <a href="/tag/inverse-kinematics.html">inverse kinematics</a>, <a href="/tag/jacobian.html">jacobian</a>, <a href="/tag/python.html">python</a>, <a href="/tag/robot.html">robot</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

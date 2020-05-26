@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>URDF Reference</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Universal Robot Description File (or URDF for short) is a file format used by ROS to describe a robot system using simple XML elements....">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="ROS">
+        <meta name="tags" content="RVIZ">
+        <meta name="tags" content="tutorial">
+        <meta name="tags" content="cheat-sheet">
+        <meta name="tags" content="URDF">
+        <meta name="tags" content="xacro">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/urdf-reference.html">
+	<meta property="og:title" content="URDF Reference">
+	<meta property="article:published_time" content="2017-09-21 04:38:00-05:00">
+            <meta property="og:description" content="Universal Robot Description File (or URDF for short) is a file format used by ROS to describe a robot system using simple XML elements....">
+
+                <meta property="og:image" content="/images/creating-a-dual-arm-manipulator-in-ROS_dual-arm.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-urdf-reference">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>URDF Reference</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Thu 21 September 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>Universal Robot Description File (or <em>URDF</em> for short) is a file format used by <em>ROS</em> to describe a robot system using simple <em>XML</em> elements. This post serves as a reference to the most common elements used in this format and explains how they interact with each other.  </p>
+<h2>Basic document structure</h2>
+<p>An <em>URDF</em> file is an <em>XML</em> document that follows a simple semantic to describe a robotic system.
+In its most basic form, an <em>URDF</em> file contains one or more <code>&lt;link&gt;</code> elements, and the corresponding <code>&lt;joint&gt;</code> elements that connect them.</p>
+<p>The file has a <code>&lt;robot&gt;</code> element as its root. Inside this element the file contains several joints and links that compose a robot.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;robot&gt;</span>
+
+    <span class="nt">&lt;link&gt;</span> ... <span class="nt">&lt;/link&gt;</span>
+    <span class="nt">&lt;link&gt;</span> ... <span class="nt">&lt;/link&gt;</span>
+
+    <span class="nt">&lt;joint&gt;</span> ... <span class="nt">&lt;/joint&gt;</span>
+    <span class="nt">&lt;joint&gt;</span> ... <span class="nt">&lt;/joint&gt;</span>
+
+<span class="nt">&lt;/robot&gt;</span>
+</code></pre></div>
+
+
+<h3><code>&lt;robot&gt;</code></h3>
+<blockquote>
+<p>The root element of every <em>URDF</em> file.</p>
+</blockquote>
+<p>Attributes:
+- <strong>name</strong> (required)
+    User-defined string representing the name of the robot.</p>
+<p>Child elements:
+- <strong>&lt; link &gt;</strong>
+    Describes a rigid body representing a link in the robot's kinematic chain.</p>
+<ul>
+<li><strong>&lt; joint &gt;</strong>
+    Connections between links are specified with this element.</li>
+</ul>
+<p>The <code>&lt;robot&gt;</code> element serves as the root of the <em>URDF</em> file. This element needs to have an attribute <code>name</code> specifying the name of the robot.
+Even though <code>&lt;link&gt;</code> and <code>&lt;joint&gt;</code> elements are not <em>required</em> to generate an <em>URDF</em> file, these elements are fundamental building blocks for any <em>URDF</em> file and skipping them will yield an 'empty' robot.</p>
+<h3><code>&lt;link&gt;</code></h3>
+<blockquote>
+<p>A rigid body representing a segment of a kinematic chain.</p>
+</blockquote>
+<p>Attributes:
+- <strong>name</strong> (required)
+    The unique name of the link. Other elements can refer to a link with this attribute.</p>
+<p>Child elements:
+- <strong>&lt; visual &gt;</strong>
+    Visual representation of the link. Can be specified as a geometry or import an external 3D file.</p>
+<ul>
+<li>
+<p><strong>&lt; inertial &gt;</strong>
+    Defines an inertial frame of reference for simulation purposes.</p>
+</li>
+<li>
+<p><strong>&lt; collision &gt;</strong>
+    Collision geometry used for the link. Can be defined as a geometry or exported from a 3D file.</p>
+</li>
+</ul>
+<p>Link elements enclose three types of information: A visual representation, inertial data, and collision information. Keep in mind that these elements are optional and a link can just be defined without any sort of data associated with it (aside from its name).</p>
+<h3><code>&lt;joint&gt;</code></h3>
+<blockquote>
+<p>An element representing a connection between links</p>
+</blockquote>
+<p>Attributes:
+- <strong>name</strong> (required)
+    The unique name of the joint.</p>
+<ul>
+<li><strong>type</strong> (required)
+    One of the six supported types of joint:<ul>
+<li><strong>revolute</strong>: rotates along its axis within upper and lower limits.</li>
+<li><strong>continuous</strong>: rotates around its axis with no limits.</li>
+<li><strong>prismatic</strong>: slides along its axis within upper and lower limits.</li>
+<li><strong>fixed</strong>: all degrees of freedom are locked.</li>
+<li><strong>floating</strong>: moves freely along all six degrees of freedom.</li>
+<li><strong>planar</strong>: moves freely along a plane perpendicular to the axis.</li>
+</ul>
+</li>
+</ul>
+<p>Child elements:
+- <strong>&lt; parent &gt;</strong> (required)
+    Specifies the name of the link that this joint belongs to.</p>
+<ul>
+<li>
+<p><strong>&lt; child &gt;</strong> (required)
+    Specifies the name of the link that belongs to this joint.</p>
+</li>
+<li>
+<p><strong>&lt; limit &gt;</strong> (required for <em>revolute</em> and <em>prismatic</em> joints)
+    The upper and lower limits that revolute and prismatic joints must follow.</p>
+</li>
+<li>
+<p><strong>&lt; origin &gt;</strong>
+    Transform between the parent link's frame and the joint's frame. Specified in <em>xyz</em> coordinates and <em>roll-pitch-yaw (rpy)</em> angles.</p>
+</li>
+<li>
+<p><strong>&lt; axis &gt;</strong> (default: <code>(1 0 0)</code>)
+    The XYZ coordinates specifying the axis of the joint. The vector should be normalized.</p>
+</li>
+<li>
+<p><strong>&lt; calibration &gt;</strong>
+    Reference positions for calibration purposes.</p>
+</li>
+<li>
+<p><strong>&lt; dynamics &gt;</strong>
+    Damping and Friction coefficients for the joint.</p>
+</li>
+<li>
+<p><strong>&lt; mimic &gt;</strong>
+    Specifies if the joint should mimic the movement of another joint.</p>
+</li>
+<li>
+<p><strong>&lt; safety_controller &gt;</strong>
+    Position and speed-related information for limiting the joint's movement.</p>
+</li>
+</ul>
+<p>Joints are used to 'connect' several links together. This is done via the <em>parent-child</em> relationship that can be specified inside a <code>&lt;joint&gt;</code> element.
+<code>&lt;joint&gt;</code> elements must be specified with two attributes: <code>name</code>, which is just a string that identifies the joint; and <code>type</code>, which can be either <code>"revolute"</code>, <code>"continuous"</code>, <code>"prismatic"</code>, <code>"fixed"</code>, <code>"floating"</code> or <code>"planar"</code>.
+It is mandatory to use the <code>&lt;limit&gt;</code> element if the joint is of type <em>revolute</em> or <em>prismatic</em>.</p>
+<h2>Customizing a &lt; link &gt; element</h2>
+<h3><code>&lt;visual&gt;</code></h3>
+<blockquote>
+<p>A visual representation of a link. Several <code>&lt;visual&gt;</code> elements can be declared for a single link.</p>
+</blockquote>
+<p>Attributes:
+- <strong>name</strong>
+string, name of this <code>&lt;visual&gt;</code> element.</p>
+<p>Elements:</p>
+<ul>
+<li>
+<p><strong>&lt; origin &gt;</strong> (default: link's frame)
+Transform between the link's frame and its visual representation.</p>
+<ul>
+<li><strong>xyz</strong> (default: <code>(0 0 0)</code> )
+vector(3), contains <em>x</em>, <em>y</em> and <em>z</em> coordinates.</li>
+<li><strong>rpy</strong> (default: <code>(0 0 0)</code> )
+vector(3), contains <em>roll-pitch-yaw</em> angles.</li>
+</ul>
+</li>
+<li>
+<p><strong>&lt; geometry &gt;</strong>
+Specifies the 3D representation to use.  </p>
+<ul>
+<li><strong>&lt; box &gt;</strong>
+A rectangular prism which its origin in the center.<ul>
+<li><strong>size</strong>
+vector(3), length of each side of the prism.</li>
+</ul>
+</li>
+<li><strong>&lt; cylinder &gt;</strong>
+A cylinder defined by its radius and length with its origin in the center.<ul>
+<li><strong>radius</strong>
+float, represents the radius.</li>
+<li><strong>length</strong>
+float, represents the length.</li>
+</ul>
+</li>
+<li><strong>&lt; sphere &gt;</strong>
+A sphere defined by its radius and with its origin in the center.<ul>
+<li><strong>radius</strong>
+float, represents the radius</li>
+</ul>
+</li>
+<li><strong>&lt; mesh &gt;</strong>
+External file containing a 3D representation of the link. Both <code>.dae</code> (preferred) and <code>.stl</code> files are supported.<ul>
+<li><strong>filename</strong>
+Path to the mesh file.</li>
+<li><strong>scale</strong> (default: <code>1</code>)
+float, scaling factor for the mesh.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>&lt; material &gt;</strong>
+Specifies the color or the texture that the link will display.<ul>
+<li><strong>name</strong>
+string, used to reference the material within the link.</li>
+<li><strong>&lt; color &gt;</strong>
+The color of the material specified by its RGB and Alpha components.<ul>
+<li><strong>rgba</strong>
+vector(4), red, green, blue and alpha values. Each in the range [0,1].</li>
+</ul>
+</li>
+<li><strong>&lt; texture &gt;</strong>
+A file containing a texture for the link.<ul>
+<li><strong>filename</strong>
+Path to a <code>.jpg</code>, <code>.png</code> or <code>.bmp</code> file.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3><code>&lt;inertial&gt;</code></h3>
+<blockquote>
+<p>An element containing information about the inertial properties of the link.</p>
+</blockquote>
+<p>Attributes:
+    <em>none</em></p>
+<p>Elements:</p>
+<ul>
+<li>
+<p><strong>&lt; origin &gt;</strong> (default: link's frame)
+Transform between the link's frame and its inertial reference frame.</p>
+<ul>
+<li><strong>xyz</strong> (default: <code>(0 0 0)</code> )
+vector(3), contains <em>x</em>, <em>y</em> and <em>z</em> coordinates.</li>
+<li><strong>rpy</strong> (default: <code>(0 0 0)</code> )
+vector(3), contains <em>roll-pitch-yaw</em> angles.</li>
+</ul>
+</li>
+<li>
+<p><strong>&lt; mass &gt;</strong>
+The mass of the link in <em>g</em>.</p>
+<ul>
+<li><strong>value</strong>
+float, mass of the link.</li>
+</ul>
+</li>
+<li>
+<p><strong>&lt; inertia &gt;</strong>
+A <span class="math">\(3 \times 3\)</span> rotational inertia matrix. The matrix can be defined with only 6 attributes since its symmetrical.</p>
+<ul>
+<li><strong>ixx</strong>, <strong>ixy</strong>, <strong>ixz</strong>, <strong>iyy</strong>, <strong>iyz</strong>, <strong>izz</strong>
+float, rotational inertia matrix element.</li>
+</ul>
+</li>
+</ul>
+<h3><code>&lt;collision&gt;</code></h3>
+<blockquote>
+<p>An element containing information about the collision properties of the link. This element contains the same attributes/children as <code>&lt;visual&gt;</code>.</p>
+</blockquote>
+<p>Attributes:
+- <strong>name</strong>
+string, name of this <code>&lt;visual&gt;</code> element.</p>
+<p>Elements:</p>
+<ul>
+<li><strong>&lt; origin &gt;</strong> (default: link's frame)
+Transform between the link's frame and its visual representation. <strong>Same element structure as &lt; visual &gt;!</strong></li>
+<li><strong>&lt; geometry &gt;</strong>
+Specifies a 3D collision model. <strong>Same element structure as &lt; visual &gt;!</strong></li>
+</ul>
+<h2>Customizing a &lt; joint &gt; element</h2>
+<h3><code>&lt;parent&gt;</code></h3>
+<blockquote>
+<p>Specifies the name of the link that this joint belongs to.</p>
+</blockquote>
+<p>Attributes:
+- <strong>link</strong>
+string, name of the parent link</p>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;child&gt;</code></h3>
+<blockquote>
+<p>Specifies the name of the link that this joint belongs to.</p>
+</blockquote>
+<p>Attributes:
+- <strong>link</strong>
+string, name of the child link</p>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;origin&gt;</code></h3>
+<blockquote>
+<p>Transform between the parent link's frame and the joint's frame.</p>
+</blockquote>
+<p>Attributes:
+- <strong>xyz</strong>
+vector(3), contains <em>x</em>, <em>y</em> and <em>z</em> coordinates.
+- <strong>rpy</strong>
+vector(3), contains <em>roll-pitch-yaw</em> angles.</p>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;limit&gt;</code></h3>
+<blockquote>
+<p>The upper and lower limits that revolute and prismatic joints must follow.</p>
+</blockquote>
+<p>Attributes:
+- <strong>lower</strong> (default: <code>0</code>)
+float, lower joint limit (radians for revolute, meters for prismatic).</p>
+<ul>
+<li>
+<p><strong>upper</strong> (default: <code>0</code>)
+float, upper joint limit (radians for revolute, meters for prismatic).</p>
+</li>
+<li>
+<p><strong>effort</strong> (required)
+float, maximum joint effort.</p>
+</li>
+<li>
+<p><strong>velocity</strong> (required)
+float, maximum joint velocity.</p>
+</li>
+</ul>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;axis&gt;</code></h3>
+<blockquote>
+<p>The XYZ coordinates specifying the axis of the joint.</p>
+</blockquote>
+<p>Attributes:
+- <strong>xyz</strong>
+vector(3), contains <em>x</em>, <em>y</em> and <em>z</em> coordinates. Should be normalized.</p>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;calibration&gt;</code></h3>
+<blockquote>
+<p>Reference positions for calibrating the absolute position of the joint.</p>
+</blockquote>
+<p>Attributes:</p>
+<ul>
+<li>
+<p><strong>rising</strong>
+float, this reference triggers a rising edge with positive-direction movement.</p>
+</li>
+<li>
+<p><strong>falling</strong>
+float, this reference triggers a falling edge with positive-direction movement.</p>
+</li>
+</ul>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;dynamics&gt;</code></h3>
+<blockquote>
+<p>Damping and Friction coefficients for the joint.</p>
+</blockquote>
+<p>Attributes:
+- <strong>damping</strong> (default: <code>0</code>)
+float, damping value given by <span class="math">\({N * m* s} / {rad}\)</span> (revolute) or <span class="math">\({N * s} / m\)</span> (prismatic).</p>
+<ul>
+<li><strong>friction</strong>
+float, static friction given by <span class="math">\(N\)</span> (revolute) or <span class="math">\(N * m\)</span> (prismatic).</li>
+</ul>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;mimic&gt;</code></h3>
+<blockquote>
+<p>Specifies if the joint should mimic the movement of another joint.</p>
+</blockquote>
+<p>Attributes:
+- <strong>joint</strong> (required)</p>
+<ul>
+<li>
+<p><strong>multiplier</strong>
+float, multiplying factor for the joint movement.</p>
+</li>
+<li>
+<p><strong>offset</strong>
+float, offset of the joint in radians or meters. A vector for joints that support it.</p>
+</li>
+</ul>
+<p>Elements:
+<em>none</em></p>
+<h3><code>&lt;safety_controller&gt;</code></h3>
+<blockquote>
+<p>Specifies velocity and effort limits enforced by the robot controller. More info in <a href="http://wiki.ros.org/pr2_controller_manager/safety_limits">safety limits</a>.</p>
+</blockquote>
+<p>Attributes:
+- <strong>soft_lower_limit</strong> (default: <code>0</code>)
+float, lower joint boundary to start limiting the position</p>
+<ul>
+<li>
+<p><strong>soft_upper_limit</strong> (default: <code>0</code>)
+float, upper joint boundary to start limiting the position</p>
+</li>
+<li>
+<p><strong>k_position</strong> (default: <code>0</code>)
+float, relation between position and velocity limits.</p>
+</li>
+<li>
+<p><strong>k_velocity</strong> (required)
+float, relation between effort and velocity limits.</p>
+</li>
+</ul>
+<hr>
+<p>Check the following post about <a href="/creating-a-dual-arm-manipulator-in-ROS.html">creating a dual-arm manipulator</a> to see <em>URDF</em> in action!</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/ros.html">ROS</a>, <a href="/tag/rviz.html">RVIZ</a>, <a href="/tag/tutorial.html">tutorial</a>, <a href="/tag/cheat-sheet.html">cheat-sheet</a>, <a href="/tag/urdf.html">URDF</a>, <a href="/tag/xacro.html">xacro</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

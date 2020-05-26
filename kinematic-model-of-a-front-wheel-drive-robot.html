@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Kinematic model of a front-wheel drive robot</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Front-wheel drive robots, as implied by their name, control their direction by manipulating the angle of their front-wheel in order to...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="kinematics">
+        <meta name="tags" content="mobile">
+        <meta name="tags" content="robot">
+        <meta name="tags" content="front-wheel drive">
+        <meta name="tags" content="bicycle">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/kinematic-model-of-a-front-wheel-drive-robot.html">
+	<meta property="og:title" content="Kinematic model of a front-wheel drive robot">
+	<meta property="article:published_time" content="2017-06-20 20:12:00-05:00">
+            <meta property="og:description" content="Front-wheel drive robots, as implied by their name, control their direction by manipulating the angle of their front-wheel in order to...">
+
+                <meta property="og:image" content="/images/kinematic-model-of-a-front-wheel-drive-robot_robot.jpg">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-kinematic-model-of-a-front-wheel-drive-robot">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Kinematic model of a front-wheel drive robot</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Tue 20 June 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>Front-wheel drive robots, as implied by their name, control their direction by manipulating the angle of their front-wheel in order to go to steer to a desired place. Here we will showcase a small script that models the kinematic model of one of this robots in Python.
+<img alt="robot" src="/images/kinematic-model-of-a-front-wheel-drive-robot_robot.jpg"></p>
+<h2>Basic concepts and formulas</h2>
+<p>Some of the basic concepts for understanding the way the robot works are presented here:</p>
+<h3>Principle of operation</h3>
+<p>With this kind of robots, we can control the angle of the steering wheel(s) ( <span class="math">\(\alpha\)</span> ) and the angular velocity of the driving (pushing) wheel(s) ( <span class="math">\(\omega\)</span> ).
+For this post we will consider simple one-front-wheel kinematic models. Simple two-wheeled transmission models give an equivalent movement.</p>
+<h3>Formulas</h3>
+<p>To calculate the speed of the robot we can use the following formula:</p>
+<div class="math">$$V = {r} \omega$$</div>
+<p>... where <span class="math">\(r\)</span> is the radius of the pushing wheel(s).</p>
+<p>We can define the instant velocity of the robot in <span class="math">\(x\)</span> and <span class="math">\(y\)</span> as:</p>
+<div class="math">$$\dot{V_x} = V \cos(\alpha) cos(\theta)$$</div>
+<div class="math">$$\dot{V_y} = V \cos(\alpha) sin(\theta)$$</div>
+<p>where <span class="math">\(\theta\)</span> is the current orientation of the robot (not to be confused with the steering wheel's angle).</p>
+<h2>Python script</h2>
+<p>The following script creates a class that models the movement of a front-wheel drive robot. The class also contains some extra functions to plot the robot's path as well as a very simple representation of the robot itself.
+In the script, an instance of the robot is created and some simple paths are described.</p>
+<div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Defines a front-wheel drive robot</span>
+<span class="sd">and makes it describe a simple path&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span>
+
+<span class="k">class</span> <span class="nc">Robot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Defines basic mobile robot properties&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_x</span>  <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_y</span>  <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span>  <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot</span>   <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delta</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+    <span class="c1"># Movement</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; updates the x,y and angle &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltax</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltay</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltaa</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">move</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Moves the robot for an &#39;s&#39; amount of seconds&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_delta</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">:</span> <span class="c1"># plot path every 3 steps</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_xya</span><span class="p">()</span>
+
+    <span class="c1"># Printing-and-plotting:</span>
+    <span class="k">def</span> <span class="nf">print_xya</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; prints the x,y position and angle &quot;&quot;&quot;</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;x = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_x</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot; &quot;</span><span class="o">+</span> <span class="s2">&quot;y = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_y</span><span class="p">))</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;a = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">plot_robot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; plots a representation of the robot &quot;&quot;&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_y</span><span class="p">,</span> <span class="mf">0.001</span>
+                  <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">),</span> <span class="mf">0.001</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">),</span>
+                  <span class="n">head_width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                  <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">plot_xya</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; plots a dot in the position of the robot &quot;&quot;&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_y</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FWDRobot</span><span class="p">(</span><span class="n">Robot</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Defines a front-wheel drive robot&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Robot</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angular_speed</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wheel_angle</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wheel_radius</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mf">0.6</span>
+
+    <span class="k">def</span> <span class="nf">deltax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates x depending on angular speed and wheel angle &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_x</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_radius</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">angular_speed</span>  \
+        <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wheel_angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">deltay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates y depending on angular speed and wheel angle &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_y</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_radius</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">angular_speed</span>  \
+        <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wheel_angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">deltaa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates angle depending on angular speed and wheel angle&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta</span> <span class="o">*</span>                                         \
+        <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">wheel_radius</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">angular_speed</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>            \
+        <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wheel_angle</span><span class="p">)</span>
+
+
+<span class="n">enesbot</span> <span class="o">=</span> <span class="n">FWDRobot</span><span class="p">()</span>            <span class="c1"># robot called &#39;enesbot&#39;</span>
+
+<span class="n">enesbot</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="mf">3.1416</span><span class="o">/</span><span class="mi">4</span>        <span class="c1"># 45 degrees</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="kc">True</span>             <span class="c1"># plot the robot!</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">plot_robot</span><span class="p">()</span>
+
+<span class="n">enesbot</span><span class="o">.</span><span class="n">angular_speed</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">wheel_angle</span>   <span class="o">=</span> <span class="mi">0</span>       <span class="c1"># straight line</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>                 <span class="c1"># move for 2 seconds</span>
+
+<span class="n">enesbot</span><span class="o">.</span><span class="n">angular_speed</span> <span class="o">=</span> <span class="mf">18.3185</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">wheel_angle</span>   <span class="o">=</span> <span class="mf">0.54042</span>  <span class="c1"># (2m diameter circle)</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>                  <span class="c1"># move for 1 second</span>
+
+<span class="n">enesbot</span><span class="o">.</span><span class="n">angular_speed</span> <span class="o">=</span> <span class="mf">18.3185</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">wheel_angle</span>   <span class="o">=-</span><span class="mf">0.54042</span>  <span class="c1"># (2m diameter circle)</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>                  <span class="c1"># move for 1 second</span>
+
+<span class="n">enesbot</span><span class="o">.</span><span class="n">angular_speed</span> <span class="o">=</span> <span class="mf">18.3185</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">wheel_angle</span>   <span class="o">=</span> <span class="mf">0.54042</span>  <span class="c1"># (2m diameter circle)</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>                  <span class="c1"># move for 1 second</span>
+
+<span class="n">enesbot</span><span class="o">.</span><span class="n">angular_speed</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">wheel_angle</span>   <span class="o">=</span> <span class="mi">0</span>       <span class="c1"># straight line</span>
+<span class="n">enesbot</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>                 <span class="c1"># move for 1 seconds</span>
+
+<span class="n">enesbot</span><span class="o">.</span><span class="n">plot_robot</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>               <span class="c1"># axis limits</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/kinematics.html">kinematics</a>, <a href="/tag/mobile.html">mobile</a>, <a href="/tag/robot.html">robot</a>, <a href="/tag/front-wheel-drive.html">front-wheel drive</a>, <a href="/tag/bicycle.html">bicycle</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>

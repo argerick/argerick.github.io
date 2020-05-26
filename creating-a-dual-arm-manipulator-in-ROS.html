@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Creating a dual-arm manipulator in ROS</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="In this blog post we will create a ROS package that contains the URDF model for a dual-arm robot, as well as the necessary configuration...">
+
+        <meta name="author" content="Erick Vieyra">
+
+        <meta name="tags" content="ROS">
+        <meta name="tags" content="RVIZ">
+        <meta name="tags" content="tutorial">
+        <meta name="tags" content="URDF">
+        <meta name="tags" content="xacro">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/creating-a-dual-arm-manipulator-in-ROS.html">
+	<meta property="og:title" content="Creating a dual-arm manipulator in ROS">
+	<meta property="article:published_time" content="2017-02-18 07:31:00-06:00">
+            <meta property="og:description" content="In this blog post we will create a ROS package that contains the URDF model for a dual-arm robot, as well as the necessary configuration...">
+
+                <meta property="og:image" content="/images/creating-a-dual-arm-manipulator-in-ROS_dual-arm.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-creating-a-dual-arm-manipulator-in-ROS">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Creating a dual-arm manipulator in ROS</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Sat 18 February 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <p>In this blog post we will create a ROS package that contains the URDF model for a dual-arm robot, as well as the necessary configuration files for executing the package and visualizing it in <em>RVIZ</em>.
+We will go through a lot of the basic features and tools of ROS, like <em>RVIZ</em>, URDF files (and <em>xacro</em>), <em>launch</em> files, package managing, etc.</p>
+<p><img alt="dual_arm" src="/images/creating-a-dual-arm-manipulator-in-ROS_dual-arm.png"></p>
+<h2>Creating a package</h2>
+<p>ROS encapsulates independent functions, methods, robot models, etc, in packages. A package can have dependencies for other packages (indicated when they are created) but packages cannot contain other packages <em>inside</em> them. ROS packages have certain characteristics that we will review in the following paragraphs.</p>
+<h3>Structure of a package</h3>
+<p>The most simple ROS package that can exist has the next structure:</p>
+<div class="highlight"><pre><span></span><code><span class="err">my_package/</span>
+<span class="err">  CMakeLists.txt</span>
+<span class="err">  package.xml</span>
+</code></pre></div>
+
+
+<p>The name of the package and the root directory must be the same. A ROS package must have a file that <em>catkin</em> can compile named <code>CMakeLists.txt</code>, and a file named <code>package.xml</code> containing information about the package.</p>
+<p>Our ROS package will have a slightly more complicated structure given that we want to include an URDF robot description within it.
+This is the structure that our package will have:</p>
+<div class="highlight"><pre><span></span><code><span class="err">enesbot_dualarm/</span>
+<span class="err">   CMakeLists.txt</span>
+<span class="err">   package.xml</span>
+<span class="err">   launch/</span>
+<span class="err">       display.launch</span>
+<span class="err">   urdf/</span>
+<span class="err">       enesbot_dualarm.xacro</span>
+<span class="err">   meshes/</span>
+<span class="err">       n0.stl</span>
+<span class="err">       n1.stl</span>
+<span class="err">       n2.stl</span>
+<span class="err">       nb.stl</span>
+<span class="err">   rviz/</span>
+<span class="err">       conf.rviz</span>
+</code></pre></div>
+
+
+<p>The structure is still simplified and only showcases the important contents of the package.
+The <code>launch/</code> directory will contain the <em>launch files</em> (one, for now) that we will use every time we execute the package using <code>roslaunch</code>.
+<code>urdf/</code> will contain the <em>xacro</em> file that defines our robot (which later gets expanded into modular <em>URDF</em> files).
+The folder called <code>meshes/</code> keeps the 3D models that our robot will use.
+The folder called <code>rviz/</code> will contain the <em>RVIZ</em> configuration file that we will generate and use when visualizing the robot.</p>
+<h3>Execution and dependencies</h3>
+<p>We can create our package by opening a terminal and navigating to <code>catkin_ws/src/</code> in our <a href="http://enesbot.me/installing-ros">previously created ROS workspace</a> and executing the following command:</p>
+<div class="highlight"><pre><span></span><code>catkin_create_pkg enesbot_dualarm rospy roscpp std_msgs
+</code></pre></div>
+
+
+<p>The command <code>catkin_create_pkg</code> creates a package with the name <code>enesbot\_dualarm</code> with <code>rospy</code>, <code>roscpp</code> and
+<code>std\_msgs</code> as dependencies (which are basic dependencies for what we want our package to do).</p>
+<p>Executing the command also produces the basic folder structure that we talked about before. We can add the remaining folders and compile the package by returning to the root of our workspace in <code>catkin_ws</code> and executing <code>catkin_make</code>:</p>
+<div class="highlight"><pre><span></span><code>catkin_make
+</code></pre></div>
+
+
+<p>After compiling a ROS package, we are able to execute it using <em>roslaunch</em>, among many other things.</p>
+<h2>URDF with xacro</h2>
+<p><em>Xacro</em> is a very simple language that allows us to create URDF files using macros that can contain simple instructions and basic math.
+The main advantage of using <em>xacro</em> is that we can take advantage of the iterative nature of robot links by defining them as macros that get repeated with different parameters throughout the robot. Using this approach saves time, increases readability, and is less error-prone.</p>
+<h3>Creating a macro</h3>
+<p>Let's create a macro that generates the code for two links of the robot (united by a joint) that will become the basic building block of each of the robot arms.
+To simplify the macro, we will input all the parameters that it needs, plus the ones that indicate its relationship with the other robot links (which link is the <em>parent</em>, which ones are the <em>children</em>, etc). We will also specify the type of joint (axis position), and the type of 3D model that represents the joint, etc.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;xacro:macro</span> <span class="na">name=</span><span class="s">&quot;segment&quot;</span> <span class="na">params=</span><span class="s">&quot;n parent child cad_type xyz origin rpy&quot;</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;joint</span> <span class="na">name=</span><span class="s">&quot;j${n}&quot;</span> <span class="na">type=</span><span class="s">&quot;continuous&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;parent</span> <span class="na">link=</span><span class="s">&quot;${parent}&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;child</span> <span class="na">link=</span><span class="s">&quot;${child}&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;origin</span> <span class="na">xyz =</span> <span class="s">&quot;${origin}&quot;</span> <span class="na">rpy=</span><span class="s">&quot;${rpy}&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;axis</span> <span class="na">xyz=</span><span class="s">&quot;${xyz}&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/joint&gt;</span>
+
+  <span class="nt">&lt;link</span> <span class="na">name=</span><span class="s">&quot;${child}&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;visual&gt;</span>
+      <span class="nt">&lt;geometry&gt;</span>
+        <span class="nt">&lt;mesh</span> <span class="na">filename=</span><span class="s">&quot;package://enesbot_dualarm/meshes/n${cad_type}.stl&quot;</span><span class="nt">/&gt;</span>
+      <span class="nt">&lt;/geometry&gt;</span>
+      <span class="nt">&lt;xacro:if</span> <span class="na">value=</span><span class="s">&quot;${cad_type == 2}&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;material</span> <span class="na">name =</span> <span class="s">&quot;white&quot;</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;color</span> <span class="na">rgba=</span><span class="s">&quot;1 1 1 1&quot;</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;/material&gt;</span>
+      <span class="nt">&lt;/xacro:if&gt;</span>
+    <span class="nt">&lt;/visual&gt;</span>
+  <span class="nt">&lt;/link&gt;</span>
+
+<span class="nt">&lt;/xacro:macro&gt;</span>
+</code></pre></div>
+
+
+<p>Lets analyze the macro part by part:</p>
+<p>We start the file with <code>&lt;xacro:macro&gt;</code> to indicate that what follows is a macro. the arguments <code>name</code> and <code>params</code> help us to define the name and the parameters that we will pass to the macro in order to produce code.
+Let's explain how each of the parameters affects the way the macro expands:</p>
+<ol>
+<li><code>n</code>: indicates the name of the segment (1, 2, ... <em>n</em>).</li>
+<li><code>parent</code>: the segment's parent.</li>
+<li><code>child</code>: the segment's child.</li>
+<li><code>cad_type</code>: the type of 3D model to use (0,1 or 2 that are segment A, segment B or end effector).</li>
+<li><code>xyz</code>: axis of the joint.</li>
+<li><code>origin</code>: origin (or displacement) of the current segment regarding the last one.</li>
+<li><code>rpy</code>: rotation of the current segment regarding the last one.</li>
+</ol>
+<p>Our macro works in the following way:
+We define a joint with the name <code>j${n}</code> (where <code>${x}</code> is a parameter, so <em>j1</em>, <em>j2</em>, etc) and then we define its relationship with the rest of the manipulator (the <code>parent</code> and <code>child</code> parameters).
+The remaining parameters are used <em>as-is</em> to specify the features of the joint we are creating.</p>
+<p>Afterwards we create a <em>link</em> (with the same name as the <code>child</code> of our joint). Note that we assign a 3D model depending on the value in <code>cad_type</code>, so the possible values are <code>n0.stl</code> (1), <code>n1.stl</code> (2), or <code>n2.stl</code> (3).  </p>
+<p>Lastly, we use a conditional to check if the segment's <code>cad_type</code> is two (which is the end effector) <code>xacro:if value="${cad_type == 2}</code>; If the segment is the end effector, we paint it white instead.</p>
+<h3>Meshes</h3>
+<p>The 3D models employed for this robot were created using <a href="http://www.openscad.org">OpenSCAD</a> and later imported as <code>.stl</code> files.
+The needed <code>.stl</code> files are included in the package and they look like this:</p>
+<p><img alt="cads" src="/images/creating-a-dual-arm-manipulator-in-ROS_cads.png"></p>
+<p>Many good how-to's and tutorials for OpenSCAD can be found in the <a href="https://en.wikibooks.org/wiki/OpenSCAD_User_Manual">OpenSCAD User Manual</a>.</p>
+<h3>The complete <em>xacro</em> file</h3>
+<p>We add the rest of the file contents to produce a complete URDF (after expanding it with the macro). We place a <em>link</em> representing the robot's base (trunk) as shown in the following file:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+<span class="nt">&lt;robot</span> <span class="na">xmlns:xacro=</span><span class="s">&quot;http://www.ros.org/wiki/xacro&quot;</span> <span class="na">name =</span><span class="s">&quot;enesbot_dualarm&quot;</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;xacro:macro</span> <span class="na">name=</span><span class="s">&quot;segment&quot;</span> <span class="na">params=</span><span class="s">&quot;n parent child cad_type xyz origin rpy&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;joint</span> <span class="na">name=</span><span class="s">&quot;j${n}&quot;</span> <span class="na">type=</span><span class="s">&quot;continuous&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;parent</span> <span class="na">link=</span><span class="s">&quot;${parent}&quot;</span><span class="nt">/&gt;</span>
+      <span class="nt">&lt;child</span> <span class="na">link=</span><span class="s">&quot;${child}&quot;</span><span class="nt">/&gt;</span>
+      <span class="nt">&lt;origin</span> <span class="na">xyz =</span> <span class="s">&quot;${origin}&quot;</span> <span class="na">rpy=</span><span class="s">&quot;${rpy}&quot;</span> <span class="nt">/&gt;</span>
+      <span class="nt">&lt;axis</span> <span class="na">xyz=</span><span class="s">&quot;${xyz}&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/joint&gt;</span>
+
+    <span class="nt">&lt;link</span> <span class="na">name=</span><span class="s">&quot;${child}&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;visual&gt;</span>
+        <span class="nt">&lt;geometry&gt;</span>
+          <span class="nt">&lt;mesh</span> <span class="na">filename=</span><span class="s">&quot;package://enesbot_dualarm/meshes/n${cad_type}.stl&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;/geometry&gt;</span>
+        <span class="nt">&lt;xacro:if</span> <span class="na">value=</span><span class="s">&quot;${cad_type == 2}&quot;</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;material</span> <span class="na">name =</span> <span class="s">&quot;white&quot;</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;color</span> <span class="na">rgba=</span><span class="s">&quot;1 1 1 1&quot;</span><span class="nt">/&gt;</span>
+                <span class="nt">&lt;/material&gt;</span>
+        <span class="nt">&lt;/xacro:if&gt;</span>
+      <span class="nt">&lt;/visual&gt;</span>
+    <span class="nt">&lt;/link&gt;</span>
+
+  <span class="nt">&lt;/xacro:macro&gt;</span>
+
+    <span class="nt">&lt;link</span> <span class="na">name=</span><span class="s">&quot;root&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;visual&gt;</span>
+            <span class="nt">&lt;geometry&gt;</span>
+                <span class="nt">&lt;mesh</span> <span class="na">filename=</span><span class="s">&quot;package://enesbot_dualarm/meshes/nb.stl&quot;</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;/geometry&gt;</span>
+        <span class="nt">&lt;/visual&gt;</span>
+    <span class="nt">&lt;/link&gt;</span>
+
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;r1&quot;</span> <span class="na">parent=</span><span class="s">&quot;root&quot;</span> <span class="na">child=</span><span class="s">&quot;r1&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;1&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0 -0.15 0.4&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 -0.523599 -0.523599&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;r2&quot;</span> <span class="na">parent=</span><span class="s">&quot;r1&quot;</span>  <span class="na">child=</span><span class="s">&quot;r2&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;0&quot;</span> <span class="na">xyz=</span><span class="s">&quot;0 0 1&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;r3&quot;</span> <span class="na">parent=</span><span class="s">&quot;r2&quot;</span>  <span class="na">child=</span><span class="s">&quot;r3&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;1&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;r4&quot;</span> <span class="na">parent=</span><span class="s">&quot;r3&quot;</span>  <span class="na">child=</span><span class="s">&quot;r4&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;0&quot;</span> <span class="na">xyz=</span><span class="s">&quot;0 0 1&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;r5&quot;</span> <span class="na">parent=</span><span class="s">&quot;r4&quot;</span>  <span class="na">child=</span><span class="s">&quot;r5&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;1&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;r6&quot;</span> <span class="na">parent=</span><span class="s">&quot;r5&quot;</span>  <span class="na">child=</span><span class="s">&quot;r6&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;0&quot;</span> <span class="na">xyz=</span><span class="s">&quot;0 0 1&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;r7&quot;</span> <span class="na">parent=</span><span class="s">&quot;r6&quot;</span>  <span class="na">child=</span><span class="s">&quot;r7&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;2&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;l1&quot;</span> <span class="na">parent=</span><span class="s">&quot;root&quot;</span> <span class="na">child=</span><span class="s">&quot;l1&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;1&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0 0.15 0.4&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 -0.523599 0.523599&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;l2&quot;</span> <span class="na">parent=</span><span class="s">&quot;l1&quot;</span>  <span class="na">child=</span><span class="s">&quot;l2&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;0&quot;</span> <span class="na">xyz=</span><span class="s">&quot;0 0 1&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;l3&quot;</span> <span class="na">parent=</span><span class="s">&quot;l2&quot;</span>  <span class="na">child=</span><span class="s">&quot;l3&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;1&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;l4&quot;</span> <span class="na">parent=</span><span class="s">&quot;l3&quot;</span>  <span class="na">child=</span><span class="s">&quot;l4&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;0&quot;</span> <span class="na">xyz=</span><span class="s">&quot;0 0 1&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;l5&quot;</span> <span class="na">parent=</span><span class="s">&quot;l4&quot;</span>  <span class="na">child=</span><span class="s">&quot;l5&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;1&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;l6&quot;</span> <span class="na">parent=</span><span class="s">&quot;l5&quot;</span>  <span class="na">child=</span><span class="s">&quot;l6&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;0&quot;</span> <span class="na">xyz=</span><span class="s">&quot;0 0 1&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;xacro:segment</span> <span class="na">n=</span><span class="s">&quot;l7&quot;</span> <span class="na">parent=</span><span class="s">&quot;l6&quot;</span>  <span class="na">child=</span><span class="s">&quot;l7&quot;</span>   <span class="na">cad_type=</span><span class="s">&quot;2&quot;</span> <span class="na">xyz=</span><span class="s">&quot;1 0 0&quot;</span> <span class="na">origin=</span><span class="s">&quot;0.1 0 0&quot;</span> <span class="na">rpy=</span><span class="s">&quot;0 0 0&quot;</span> <span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/robot&gt;</span>
+</code></pre></div>
+
+
+<p>To use the <em>xacro</em> file, we need to execute it with the tool of the same name ( <code>xacro</code> ) just as it is shown in the next command:</p>
+<div class="highlight"><pre><span></span><code>rosrun xacro xacro enesbot_dualarm.xacro
+</code></pre></div>
+
+
+<p><code>xacro</code> expands a xacro file into its corresponding URDF code in the terminal. A very common way of expanding a <em>xacro</em> into a file and checking its integrity with <code>check_urdf</code> is by using the two following commands:</p>
+<div class="highlight"><pre><span></span><code>rosrun xacro xacro enesbot_dualarm.xacro &gt; exp_enesbot_dualarm.urdf --inorder
+check_urdf exp_enesbot_dualarm.urdf
+</code></pre></div>
+
+
+<h2>The launch file</h2>
+<p>We can use a launch file to execute several ROS nodes (processes) that implement the functionality that we need for displaying our robot.
+Visualizing a robot in ROS requires <code>rviz</code>, and to be able to control the value of its joints (to move it), we need at least 2 other nodes: <code>joint_state_publisher</code> and <code>robot_state_publisher</code>.
+Let's create a launch file that lets us execute these three nodes with its corresponding arguments in a single command!</p>
+<h3>How does a launch file works</h3>
+<p>Launch files are <em>xml</em> files that contain ROS commands. In their most basic form, they contain three types of elements:</p>
+<ul>
+<li><code>arg</code>: Elements that we declare ourselves, like the URDF of the robot.</li>
+<li><code>param</code>: Elements defined by ROS and used by their nodes.</li>
+<li><code>node</code>: processes either part of ROS or written by the developer, like <em>RVIZ</em>.</li>
+</ul>
+<p>First we will write the a command that loads as arguments our <em>xacro</em> file and our <em>RVIZ</em> configuration file (more on this last file in a moment).</p>
+<p>The parameter <code>robot_description</code> will take the expanded output from <code>xacro</code>.
+Since we want to <em>manually</em> move the joints of our robot, we will assign the option <code>True</code> to the <code>use_gui</code> option from the <code>joint_state_publisher</code> node.<br>
+Lastly, we will execute three nodes: the <code>joint_state_publisher</code>, the <code>robot_state_publisher</code> and <code>rviz</code>.</p>
+<p>Note that <code>rviz</code> is executed with the <code>required=True</code> option. This means that if the user closes this node, all the processes should terminate their execution too (since we cannot visualize the robot anymore).</p>
+<h3>Configuring RVIZ</h3>
+<p>We mentioned a configuration file for <em>RVIZ</em> in the last section. To get it, we can execute <em>RVIZ</em> and create one using the following steps:<br>
+1. Run <code>roscore</code> in a terminal.</p>
+<div class="highlight"><pre><span></span><code>roscore
+</code></pre></div>
+
+
+<ol>
+<li>In another terminal, run the following command to start <em>RVIZ</em>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>rosrun rviz rviz
+</code></pre></div>
+
+
+<ol>
+<li>
+<p>Add views, modify or change the environment as needed. For example it is useful for this example to add the <em>Robot Model</em> and <em>TF</em> panels from the <code>Panels</code> menu.</p>
+</li>
+<li>
+<p>Save the configuration using the <code>File</code> menu in the desired location.</p>
+</li>
+</ol>
+<p><img alt="rviz_settings" src="/images/creating-a-dual-arm-manipulator-in-ROS_rviz-settings.png"></p>
+<h3>The launch file</h3>
+<p>The final version of our launch file will look like this:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;launch&gt;</span>
+
+    <span class="nt">&lt;arg</span> <span class="na">name =</span> <span class="s">&quot;model&quot;</span> <span class="na">default =</span> <span class="s">&quot;$(find enesbot_dualarm)/urdf/n.xacro&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;arg</span> <span class="na">name=</span><span class="s">&quot;rvizconfig&quot;</span> <span class="na">default=</span><span class="s">&quot;$(find enesbot_dualarm)/rviz/conf.rviz&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;param</span> <span class="na">name =</span> <span class="s">&quot;robot_description&quot;</span> <span class="na">command=</span><span class="s">&quot;$(find xacro)/xacro $(arg model) --inorder&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;param</span> <span class="na">name=</span><span class="s">&quot;use_gui&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;node</span> <span class="na">name=</span><span class="s">&quot;joint_state_publisher&quot;</span> <span class="na">pkg=</span><span class="s">&quot;joint_state_publisher&quot;</span> <span class="na">type=</span><span class="s">&quot;joint_state_publisher&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;node</span> <span class="na">name=</span><span class="s">&quot;robot_state_publisher&quot;</span> <span class="na">pkg=</span><span class="s">&quot;robot_state_publisher&quot;</span> <span class="na">type=</span><span class="s">&quot;state_publisher&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;node</span> <span class="na">name=</span><span class="s">&quot;rviz&quot;</span> <span class="na">pkg=</span><span class="s">&quot;rviz&quot;</span> <span class="na">type=</span><span class="s">&quot;rviz&quot;</span> <span class="na">required=</span><span class="s">&quot;true&quot;</span> <span class="na">args=</span><span class="s">&quot;-d $(arg rvizconfig)&quot;</span><span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/launch&gt;</span>
+</code></pre></div>
+
+
+<p>Place it in the <code>enesbot_dualarm/launch/</code> directory.</p>
+<h2>Executing the package</h2>
+<p>Once we have all the files ready, we can try to build our workspace and execute the package to test the manipulator:</p>
+<p>Navigate to the root of the workspace and run:</p>
+<div class="highlight"><pre><span></span><code>catkin_make
+</code></pre></div>
+
+
+<p>Then, launch the package using our newly created launch file using the <code>roslaunch</code>:</p>
+<div class="highlight"><pre><span></span><code>roslaunch enesbot_dualarm display.launch
+</code></pre></div>
+
+
+<p>You can use the GUI control from the joint_state_publisher to move the joints of the robot in <em>RVIZ</em>!</p>
+<p><img alt="rviz" src="/images/creating-a-dual-arm-manipulator-in-ROS_rviz.png"></p>
+<p>The package for this tutorial is available in <a href="https://github.com/sevieyra/enesbot_dualarm">Github</a>! You can clone it and try it yourself by running the following command:</p>
+<div class="highlight"><pre><span></span><code>git clone https://github.com/sevieyra/enesbot_dualarm.git
+</code></pre></div>
+
+
+<p><em>Note</em>: remember to place it in your catkin workspace!</p>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/ros.html">ROS</a>, <a href="/tag/rviz.html">RVIZ</a>, <a href="/tag/tutorial.html">tutorial</a>, <a href="/tag/urdf.html">URDF</a>, <a href="/tag/xacro.html">xacro</a></p>
+        </div>
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+</body>
+
+</html>
