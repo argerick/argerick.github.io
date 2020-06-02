@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>C++ Basics</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/darkly.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Getting Started Source files C++ stores its code in .cpp and .h files. Cpp files contain the software's implementation, while header...">
+
+        <meta name="author" content="Erick Vieyra">
+
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="enesbot">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/erick-vieyra.html">
+	<meta property="og:url" content="/cpp-basics.html">
+	<meta property="og:title" content="C++ Basics">
+	<meta property="article:published_time" content="2020-06-02 20:06:00-05:00">
+            <meta property="og:description" content="Getting Started Source files C++ stores its code in .cpp and .h files. Cpp files contain the software's implementation, while header...">
+
+            <meta property="og:image" content="images/cover.png">
+    <link rel="icon" href="/favicon.ico">
+</head>
+
+<body class="article-cpp-basics">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">enesbot</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+
+                            <li><a href="/pages/about.html">About</a></li>
+                            <li><a href="/pages/cpp.html">C++</a></li>
+                            <li><a href="/pages/kinematics.html">Kinematics</a></li>
+                            <li><a href="/pages/robotstudio.html">RobotStudio</a></li>
+                            <li><a href="/pages/ros.html">ROS</a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/images/cover.png')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>C++ Basics</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/erick-vieyra.html">Erick Vieyra</a>
+                             on Tue 02 June 2020
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <h2>Getting Started</h2>
+<h3>Source files</h3>
+<p>C++ stores its code in <code>.cpp</code> and <code>.h</code> files. Cpp files contain the software's implementation, while header files store the declaration (interface).</p>
+<p>Some common headers are:</p>
+<ul>
+<li><code>&lt;iostream&gt;</code>: Input/output functionality like <code>std::cout</code>, <code>std::cin</code>, <code>std::endl</code>.</li>
+<li><code>&lt;string&gt;</code>: The standard string class of C++.</li>
+<li><code>&lt;vector&gt;</code>: The <code>vector</code> container.</li>
+<li><code>&lt;functional&gt;</code>: Useful algorithms that heavily use the <em>std</em> containers.  </li>
+</ul>
+<p>Use the directive <code>#include</code> to use them:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+
+<span class="c1">// now we can use std::cout, for instance</span>
+</code></pre></div>
+
+
+<h3>Common types</h3>
+<ul>
+<li><strong>Integers</strong>: <code>int</code>, <code>short</code>, <code>long</code> and their unsigned versions</li>
+<li><strong>Real Numbers</strong>: <code>float</code>, <code>double</code> and their unsigned versions</li>
+<li><strong>Characters</strong>: <code>char</code>, <code>unsigned char</code></li>
+<li><strong>Boolean</strong>: <code>bool</code></li>
+<li><strong>Strings</strong>: <code>std::String</code> (requires <code>&lt;String&gt;</code>)</li>
+</ul>
+<p>Always avoid <em>c-strings</em>, this is, using an array of <code>char</code> instead of using the <code>std::String</code> class.</p>
+<p>You can use <code>auto</code> to let the compiler deduce the type without loosing strong types. Always use it unless enforcing some type conversion!</p>
+<blockquote>
+<p><strong>Note</strong>: <code>std</code> stands for <em>Standard Library</em>.</p>
+</blockquote>
+<h3>Variable declaration</h3>
+<p>Since C++ is a typed language, you need to include the type before the variable declaration:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</code></pre></div>
+
+
+<h2>Flow Control</h2>
+<blockquote>
+<p>Coming soon</p>
+</blockquote>
+<h2>References <code>&amp;</code></h2>
+<p>References are the default way of passing objects without copying them. References are <strong>constant</strong> and they need to be initialized when declared!</p>
+<p>Use the <code>&amp;</code> operator after a class name to declare a reference.</p>
+<div class="highlight"><pre><span></span><code><span class="n">Car</span> <span class="n">c</span><span class="p">;</span>
+<span class="n">Car</span><span class="o">&amp;</span> <span class="n">ref_c</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span> <span class="c1">//a ref to the Car c </span>
+</code></pre></div>
+
+
+<p>A reference to a parent (or different, compatible) class can be declared and used to handle the object as the aforementioned class. This is a (very simple) example of <strong>Polymorphism</strong> in C++.</p>
+<div class="highlight"><pre><span></span><code><span class="n">Car</span> <span class="n">c</span>
+<span class="n">Vehicle</span><span class="o">&amp;</span> <span class="n">ref</span> <span class="o">=</span> <span class="n">c</span><span class="p">;</span> <span class="c1">// handle c as a Vehicle</span>
+</code></pre></div>
+
+
+<h4>What about pointers?</h4>
+<p>In general, <strong>avoid c-style pointers</strong>. C++ has better alternatives that free the developer from managing memory directly. 
+Use references and <a href="comming soon">Smart Pointers</a> instead! </p>
+<p>Null pointers (<code>nullptr</code>) are another new addition in C++ and should be used instead of <code>NULL</code>. <code>nullptr</code> provides additional type safety since <code>NULL</code> is just <code>0</code>.</p>
+<h3>Enumerations</h3>
+<blockquote>
+<p>TODO enum
+TODO enum class (two-word keyword)</p>
+</blockquote>
+<h2>Classes and Inheritance</h2>
+<h3>Declaration</h3>
+<p>Declare a class with the <code>class</code> keyword:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Dog</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+<span class="p">};</span>
+</code></pre></div>
+
+
+<p>Don't forget the semicolon at the end!</p>
+<h3>Headers, Source Files</h3>
+<p>Header files are intended to have the declaration of the class, as well as serve as an interface specification.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Car.h</span>
+<span class="k">class</span> <span class="nc">Car</span> <span class="p">{</span> 
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">model</span><span class="p">;</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="kt">void</span> <span class="n">setModel</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">car_model</span><span class="p">)</span>
+<span class="p">};</span>
+</code></pre></div>
+
+
+<p>The implementation of the class goes in the <em>cpp</em> source file.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Car.cpp</span>
+<span class="cp">#include</span> <span class="cpf">&quot;Car.h&quot;</span><span class="cp"></span>
+<span class="n">Car</span><span class="o">::</span><span class="n">Car</span><span class="p">()</span> <span class="p">{</span> <span class="cm">/* implementation */</span> <span class="p">}</span>
+<span class="kt">void</span> <span class="n">Car</span><span class="o">::</span><span class="n">setModel</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">car_model</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="n">model</span> <span class="o">=</span> <span class="n">car_model</span>
+<span class="p">}</span>
+
+<span class="c1">// main.cpp</span>
+<span class="cp">#include</span> <span class="cpf">&quot;Car.h&quot;</span><span class="cp"></span>
+<span class="kt">int</span> <span class="n">main</span> <span class="p">()</span> <span class="p">{</span> <span class="cm">/* main program */</span><span class="p">}</span> 
+</code></pre></div>
+
+
+<h3>Member functions and objects</h3>
+<p>By default, member functions and objects are private. Use the keywords <code>public:</code> and <code>private:</code> to define access for objects of other classes.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Cat</span> <span class="p">{</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">;</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>Try to make all variable and objects private and define public interfaces as needed. </p>
+<h3>Constructor</h3>
+<p>Constructors have the same name as the class and do not return any value. Modern C++ allows to  use a <strong>initialization list</strong> to easily pass values to the members of an object.</p>
+<div class="highlight"><pre><span></span><code><span class="c">Cat::Cat(std::string new_name): name(new_name) </span>
+<span class="c">    {} // its common to have an empty constructor </span>
+</code></pre></div>
+
+
+<p>Using an initialization list allows the class to assign its members <em>before</em> the actual constructor starts to run. When assigning object members (like <code>std::string</code>), we skip a value overwrite since objects get constructed first to their default values (for standard strings its <code>""</code>) and then it gets overwritten to the desired value. </p>
+<h3>Copy and Move Constructors</h3>
+<p>If a constructor receives an object of the same class, it is used for initializing the new object with the passed object and is called a <strong>Copy Constructor</strong>. It is important to remember that the compiler just makes a shallow copy of the object, therefore if the object has any references/pointers with some implied ownership, it might be necessary to copy these in the body of the constructor. </p>
+<h3>Inheritance</h3>
+<p>To derive a class from another class, use the <code>:</code> operator:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Dog</span><span class="o">:</span> <span class="k">public</span> <span class="n">Animal</span> <span class="p">{</span>
+    <span class="c1">// ...</span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>Note that the type of inheritance has to be specified as either public, private or protected!</p>
+<h3>Static members</h3>
+<p>Use the keyword <strong>static</strong> when a member of a class needs to be used at a class level (not at an instance level). While C++ does not create static classes, one can emulate one by declaring only static members and private constructors. </p>
+<h2>Polymorphism</h2>
+<blockquote>
+<p>Coming soon</p>
+</blockquote>
+<h2>Memory Management</h2>
+<h3>Stack and Heap Semantics</h3>
+<blockquote>
+<p>Coming soon</p>
+</blockquote>
+<h3>Smart Pointers</h3>
+<p>One should always strive to use stack semantics, but for the cases where memory from the heap needs to be accessed, use a smart pointer. The underlying characteristic of this pointers is that they automatically call the destructor of whichever resource they are pointing to whenever they go out of scope, thus ensuring no dangling pointers.
+Depending on the situation, use one of the following smart pointers from the <code>std::memory</code> header:</p>
+<h4>unique_ptr</h4>
+<p>A unique pointer ensures that only one object can access a resource. Copy operations are not allowed but the pointer can still be moved. </p>
+<h4>shared_ptr</h4>
+<p>Use this type of pointers when several objects need to access a resource. Shared pointers implement count reference to make sure that the resource they point to is destroyed only when each and every of objects that point to it have gone out of scope. </p>
+<h4>weak_ptr</h4>
+<p>Similar to a shared pointer but they do not incur in the reference counting for the resource, therefore they allow that the resource gets destroyed even when several weak pointers are still pointing to this. Check for the object existence before accessing it!</p>
+<h3>Rule of 3 (and rule and 5)</h3>
+<blockquote>
+<p>Coming soon</p>
+</blockquote>
+<h2>Functions (advanced)</h2>
+<h3>Function objects</h3>
+<p>Any class that implements <code>operator()</code> produces a function object:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Functor</span> <span class="p">{</span>  
+    <span class="k">public</span><span class="o">:</span> 
+    <span class="kt">int</span> <span class="k">operator</span><span class="p">()(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span> 
+        <span class="k">return</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">;</span> 
+    <span class="p">}</span> 
+<span class="p">};</span> 
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span> 
+    <span class="n">Functor</span> <span class="n">f</span><span class="p">;</span> 
+    <span class="kt">int</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span> <span class="c1">// ans = 15 </span>
+<span class="p">}</span>
+</code></pre></div>
+
+
+<p>As any other object, function objects, or <em>functors</em>, can store state and are useful for templates. </p>
+<h3>Lambdas</h3>
+<p>Called predicates in the context of the STL.</p>
+<p>General syntax: <code>[ capture clause ]( arguments ){ body }</code>.
+For instance:</p>
+<div class="highlight"><pre><span></span><code><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span> <span class="p">{</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">};</span> 
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">p</span> <span class="o">=</span> <span class="n">find_if</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">v</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">i</span><span class="p">){</span> 
+    <span class="k">return</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">;</span>
+<span class="p">});</span> 
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;First number greater than 4 is : &quot;</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">p</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> 
+</code></pre></div>
+
+
+<p>The <em>Capture clause</em>, or <em>Lambda initiator</em> is used to access variables from the outer scope or introduce new ones.</p>
+<h3>Callbacks</h3>
+<p>You can create a generic callable to pass it to other functions/methods using <code>std::function</code>.</p>
+<h3>Map, filter and reduce</h3>
+<p>C++ has no map, filter and reduce methods. instead use <code>std::transform</code>, <code>std::copy_if</code>, <code>std::accumulate</code> </p>
+<h3>Casting</h3>
+<p>The compiler converts from one data type to another and generates warnings if data might be lost. To explicitly make a conversion, use une of the following cast methods:</p>
+<p>Avoid C-style casts (round bracket casts). Use one of the following instead:
+- <code>static_cast&lt;type&gt;</code>: Cast to <em>type</em> within compatible types.
+- <code>dynamic_cast&lt;type&gt;</code>: Includes type-safety checks to ensure a cast to a full, complete object.<br>
+- <code>reinterpret_cast&lt;type&gt;</code>: Converts any pointer to <em>type</em>, no checks whatsoever!
+- <code>const_cast&lt;type&gt;</code>: Sets or removes <em>constness</em> of an object.</p>
+<h3>Include Guards</h3>
+<p>Use the pre-processor to write include guards for header files like this:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#ifndef HEADER_NAME_CONSTANT</span>
+<span class="cp">#define HEADER_NAME_CONSTANT</span>
+    <span class="cm">/* header file content... */</span>
+<span class="cp">#endif</span>
+</code></pre></div>
+    </article>
+
+
+    <hr>
+
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://www.github.com/eviey/">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.linkedin.com/in/sevieyra/">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>. <br />        &copy;  Erick Vieyra
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-82205814-1', 'auto');
+    ga('send', 'pageview');
+</script>
+</body>
+
+</html>
