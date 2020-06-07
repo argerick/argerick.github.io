@@ -250,9 +250,18 @@
 Use references and <a href="comming soon">Smart Pointers</a> instead! </p>
 <p>Null pointers (<code>nullptr</code>) are another new addition in C++ and should be used instead of <code>NULL</code>. <code>nullptr</code> provides additional type safety since <code>NULL</code> is just <code>0</code>.</p>
 <h3>Enumerations</h3>
+<p>Define enumerated types using the <code>enum</code> keyword:</p>
+<div class="highlight"><pre><span></span><code><span class="k">enum</span> <span class="n">Animals</span> <span class="p">{</span>
+    <span class="n">dog</span><span class="p">,</span>
+    <span class="n">cat</span><span class="p">,</span>
+    <span class="n">bird</span>
+<span class="p">};</span>
+</code></pre></div>
+
+
+<p>Use <code>class</code> or <code>struct</code> with <code>enum</code> to define scope.</p>
 <blockquote>
-<p>TODO enum
-TODO enum class (two-word keyword)</p>
+<p><strong>Note</strong>: Don't forget the <code>;</code> at the end of an enum declaration</p>
 </blockquote>
 <h2>Classes and Inheritance</h2>
 <h3>Declaration</h3>
